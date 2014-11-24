@@ -5,11 +5,6 @@
  * does not connect to the server specified in the constructor. You need to call
  * connect() to actually perform the connection.
  *
- * @category Xmpp
- * @package  Xmpp
- * @author   Alex Mace <a@m.me.uk>
- * @license  http://m.me.uk/xmpp/license/ New BSD License
- * @link     http://pear.m.me.uk/package/Xmpp
  * @todo Store what features are available when session is established
  * @todo Handle error conditions of authenticate, bind, connect and
  *         establishSession

@@ -2,13 +2,6 @@
 
 /**
  * Abstract class for representing Xmpp Stanzas.
- *
- * @category  XMPP
- * @package   XMPP
- * @author    Alex Mace <a@m.me.uk>
- * @copyright 2010-2011 Alex Mace (http://m.me.uk)
- * @license   http://m.me.uk/license New BSD License
- * @link      http://m.me.uk/xmpp
  */
 abstract class Xmpp_Stanza
 {

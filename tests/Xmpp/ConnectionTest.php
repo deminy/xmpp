@@ -7,13 +7,6 @@ require_once 'Xmpp/Connection.php';
  * Tests for the XMPP class. Each tests need to mock the Stream object and stub the
  * _getStream method so that the XMPP class doesn't actually have to connect to
  * anything.
- *
- * @category  XMPP
- * @package   XMPP
- * @author    Alex Mace <a@m.me.uk>
- * @copyright 2010-2011 Alex Mace (http://m.me.uk)
- * @license   http://m.me.uk/license New BSD License
- * @link      http://m.me.uk/xmpp
  */
 class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
 {
