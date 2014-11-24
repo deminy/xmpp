@@ -2,6 +2,8 @@
 
 namespace Xmpp;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Xmpp is an implementation of the Xmpp protocol. Note that creating the class
  * does not connect to the server specified in the constructor. You need to call
@@ -48,19 +50,19 @@ class Connection
      *
      * @var string
      */
-    protected $_host = null;
+    protected $_host;
 
     /**
      * @var SimpleXMLElement
      */
-    protected $_lastResponse = null;
+    protected $_lastResponse;
 
     /**
      * Class that performs logging
      *
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    protected $_logger = null;
+    protected $_logger;
 
     /**
      * @var array
@@ -72,14 +74,14 @@ class Connection
      *
      * @var string
      */
-    protected $_password = null;
+    protected $_password;
 
     /**
      * Holds the port of the server to connect to
      *
      * @var int
      */
-    protected $_port = null;
+    protected $_port;
 
     /**
      * Holds the "realm" of the user name. Usually refers to the domain in the
@@ -109,14 +111,14 @@ class Connection
      *
      * @var Stream
      */
-    protected $_stream = null;
+    protected $_stream;
 
     /**
      * Holds the username used for authentication with the server
      *
      * @var string
      */
-    protected $_userName = null;
+    protected $_userName;
 
     /**
      * Class constructor
@@ -126,7 +128,7 @@ class Connection
      * @param string $host Host name of the server to connect to
      * @param int $ssl Whether or not to connect over SSL if it is
      *                         available.
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      * @param int $port Port to use for the connection
      * @param string $resource Identifier of the connection
      */
@@ -135,7 +137,7 @@ class Connection
         $password,
         $host,
         $ssl = true,
-        \Psr\Log\LoggerInterface $logger,
+        LoggerInterface $logger,
         $port = 5222,
         $resource = 'NewXmpp'
     ) {
@@ -875,7 +877,6 @@ class Connection
      */
     protected function requestReservedNickname($roomJid)
     {
-
         $message =
             "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
             . $this->_resource . "' id='" . uniqid() . "' "
@@ -913,7 +914,6 @@ class Connection
      */
     public function message($to, $text)
     {
-
         // Get the first part of the JID
         $toExploded = explode("/", $to);
         $firstPart = array_shift($toExploded);
