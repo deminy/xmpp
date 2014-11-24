@@ -17,5 +17,10 @@
             "email": "deminy@deminy.net",
             "homepage": "http://deminy.net"
         }
-    ]
+    ],
+    "autoload" : {
+        "psr-4" : {
+            "Xmpp\\" : "lib/Xmpp/"
+        }
+    }
 }
