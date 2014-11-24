@@ -5,9 +5,8 @@ namespace Xmpp;
 use PHPUnit_Framework_TestCase;
 
 /**
- * Tests for the XMPP class. Each tests need to mock the Stream object and stub the
- * _getStream method so that the XMPP class doesn't actually have to connect to
- * anything.
+ * Tests for the XMPP class. Each tests need to mock the Stream object and stub the _getStream method so that the XMPP
+ * class doesn't actually have to connect to anything.
  */
 class ConnectionTest extends PHPUnit_Framework_TestCase
 {
@@ -29,7 +28,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
      */
     public function tearDown()
     {
-   }
+    }
 
     /**
      * Test for the connect function
@@ -115,7 +114,6 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
      * Gets a mock instance of \Xmpp\Connection for use in tests.
      *
      * @param Stream $stream A stream to connect with.
-     *
      * @return type
      */
     public function getMockXmppConnection(Stream $stream)
