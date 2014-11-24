@@ -82,11 +82,11 @@ class Stream
             $this->_conn = stream_socket_client(
                 $remoteSocket, $this->_errorNumber, $this->_errorString
             );
-        } else if (is_null($flags) && is_null($context)) {
+        } elseif (is_null($flags) && is_null($context)) {
             $this->_conn = stream_socket_client(
                 $remoteSocket, $this->_errorNumber, $this->_errorString, $timeOut
             );
-        } else if (is_null($context)) {
+        } elseif (is_null($context)) {
             $this->_conn = stream_socket_client(
                 $remoteSocket, $this->_errorNumber, $this->_errorString, $timeOut,
                 $flags
@@ -228,5 +228,4 @@ class Stream
 
         return $res;
     }
-
 }

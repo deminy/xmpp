@@ -181,5 +181,4 @@ class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
         $xmpp = $this->getMockXmppConnection($stream);
         $xmpp->disconnect();
     }
-
 }

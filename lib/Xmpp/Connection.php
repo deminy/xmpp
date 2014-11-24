@@ -175,8 +175,7 @@ class Xmpp_Connection
     {
         // Check that the server said that DIGEST-MD5 was available
         if ($this->mechanismAvailable('DIGEST-MD5')) {
-
-            // Send message to the server that we want to authenticate
+// Send message to the server that we want to authenticate
             $message = "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' "
                 . "mechanism='DIGEST-MD5'/>";
             $this->_logger->debug('Requesting Authentication: ' . $message);
@@ -187,7 +186,7 @@ class Xmpp_Connection
             $this->_logger->debug('Response: ' . $response->asXML());
 
             // Decode the response
-            $decodedResponse = base64_decode((string)$response);
+            $decodedResponse = base64_decode((string) $response);
             $this->_logger->debug('Response (Decoded): ' . $decodedResponse);
 
             // Split up the parts of the challenge
@@ -210,12 +209,12 @@ class Xmpp_Connection
 
             $cnonce = uniqid();
             $a1 = pack(
-                    'H32',
-                    md5(
-                        $this->_userName . ':' . $challenge['realm'] . ':' .
-                        $this->_password
-                    )
+                'H32',
+                md5(
+                    $this->_userName . ':' . $challenge['realm'] . ':' .
+                    $this->_password
                 )
+            )
                 . ':' . $challenge['nonce'] . ':' . $cnonce;
 
             $a2 = 'AUTHENTICATE:xmpp/' . $challenge['realm'];
@@ -311,7 +310,6 @@ class Xmpp_Connection
 
         // If there is nothing left in the buffer, wait for the stream to update
         if (count($this->_buffer) == 0 && $this->_stream->select() > 0) {
-
             $response = '';
 
             $done = false;
@@ -328,8 +326,7 @@ class Xmpp_Connection
 
             // If the response isn't empty, load it into a SimpleXML element
             if (trim($response) != '') {
-
-                // If the response from the server starts (where "starts
+// If the response from the server starts (where "starts
                 // with" means "appears after the xml prologue if one is
                 // present") with "<stream:stream and it doesn't have a
                 // closing "</stream:stream>" then we should append one so
@@ -379,11 +376,10 @@ class Xmpp_Connection
                 // otherwise check the contents of the stream.
                 if ($tag == 'stream:stream') {
                     $fromServer = $xml;
-                } else if ($xml instanceof SimpleXMLElement
+                } elseif ($xml instanceof SimpleXMLElement
                     && $xml->getName() == 'stream'
                 ) {
-
-                    // Get the namespaces used at the root level of the
+// Get the namespaces used at the root level of the
                     // document. Add a blank namespace on for anything that
                     // isn't namespaced. Then we can iterate over all of the
                     // elements in the doc.
@@ -405,11 +401,9 @@ class Xmpp_Connection
 
         // Now go over what is in the buffer and return anything necessary
         foreach ($this->_buffer as $key => $stanza) {
-
-            // Only bother looking for more tags if one has not yet been found.
+// Only bother looking for more tags if one has not yet been found.
             if ($fromServer === false) {
-
-                // Remove this element from the buffer because we do not want it to
+// Remove this element from the buffer because we do not want it to
                 // be processed again.
                 unset($this->_buffer[$key]);
 
@@ -473,8 +467,7 @@ class Xmpp_Connection
         $server = $this->getServer();
 
         try {
-
-            // Get a connection to server
+// Get a connection to server
             $this->_stream = $this->getStream($server);
             $this->_logger->debug('Connection made');
 
@@ -498,8 +491,7 @@ class Xmpp_Connection
             // TODO - Xpath would probably be more sensible for this, but for
             // now this'll work.
             if (strpos($response->asXml(), '<stream:features') === false) {
-
-                // Server should now send back a features tag telling us what
+// Server should now send back a features tag telling us what
                 // features it supports. If it tells us to start tls then we will
                 // need to change to a secure connection. It will also tell us what
                 // authentication methods it supports.
@@ -599,18 +591,17 @@ class Xmpp_Connection
         // That should contain a mechanisms tag. Find the mechanisms tag and load it
         // into a SimpleXMLElement object.
         if (preg_match(
-                '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/', $features->asXml(), $matches
-            ) != 0
+            '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/', $features->asXml(), $matches
+        ) != 0
         ) {
-
-            // Clear out any existing mechanisms
+// Clear out any existing mechanisms
             $this->_mechanisms = array();
 
             // Create SimpleXMLElement
             $xml = simplexml_load_string($matches[1]);
 
             foreach ($xml->children() as $child) {
-                $this->_mechanisms[] = (string)$child;
+                $this->_mechanisms[] = (string) $child;
             }
         }
     }
@@ -668,7 +659,7 @@ class Xmpp_Connection
      */
     public function getIq()
     {
-        if ((string)$this->_lastResponse->getName() != 'iq') {
+        if ((string) $this->_lastResponse->getName() != 'iq') {
             throw new Xmpp_Exception('Last stanza received was not an iq stanza');
         }
 
@@ -682,7 +673,7 @@ class Xmpp_Connection
      */
     public function getMessage()
     {
-        if ((string)$this->_lastResponse->getName() != 'message') {
+        if ((string) $this->_lastResponse->getName() != 'message') {
             throw new Xmpp_Exception('Last stanza received was not a message');
         }
 
@@ -777,8 +768,7 @@ class Xmpp_Connection
         $items[] = array('jid' => $this->_realm);
 
         foreach ($items as $item) {
-
-            // Send iq stanza asking if this server supports MUC.
+// Send iq stanza asking if this server supports MUC.
             $message = "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
                 . $this->_resource . "' id='disco1' "
                 . "to='" . $item['jid'] . "' type='get'>"
@@ -798,12 +788,10 @@ class Xmpp_Connection
             // If it is, then MUC is supported
             if (isset($response->query)) {
                 foreach ($response->query->children() as $feature) {
-
                     if ($feature->getName() == 'feature'
                         && isset($feature->attributes()->var)
                         && $feature->attributes()->var == 'http://jabber.org/protocol/muc'
                     ) {
-
                         $mucSupported = true;
                     }
                 }
@@ -834,7 +822,6 @@ class Xmpp_Connection
         while (!$response || $response->getName() != 'iq'
             || strpos($response->asXml(), '<item') === false
         ) {
-
             $response = $this->waitForServer('iq');
         }
         $this->_logger->debug('Received: ' . $response->asXML());
@@ -847,8 +834,7 @@ class Xmpp_Connection
                     && isset($item->attributes()->jid)
                     && isset($item->attributes()->name)
                 ) {
-
-                    // If items is null then we need to turn it into an array.
+// If items is null then we need to turn it into an array.
                     if (is_null($this->items)) {
                         $this->items = array();
                     }
@@ -1556,5 +1542,4 @@ class Xmpp_Connection
             $this->_logger->debug('Stream closed');
         }
     }
-
 }

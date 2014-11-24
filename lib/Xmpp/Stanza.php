@@ -47,15 +47,15 @@ abstract class Xmpp_Stanza
     {
 
         if (isset($stanza['from'])) {
-            $this->_from = (string)$stanza['from'];
+            $this->_from = (string) $stanza['from'];
         }
 
         if (isset($stanza['to'])) {
-            $this->_to = (string)$stanza['to'];
+            $this->_to = (string) $stanza['to'];
         }
 
         if (isset($stanza['id'])) {
-            $this->_id = (string)$stanza['id'];
+            $this->_id = (string) $stanza['id'];
         }
     }
 
@@ -98,5 +98,4 @@ abstract class Xmpp_Stanza
     {
         return $this->_id;
     }
-
 }

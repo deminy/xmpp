@@ -57,35 +57,35 @@ class Xmpp_Message extends Xmpp_Stanza
 
         // Get the type of the message
         if (isset($message['type'])
-            && ((string)$message['type'] == self::TYPE_CHAT
-                || (string)$message['type'] == self::TYPE_ERROR
-                || (string)$message['type'] == self::TYPE_GROUPCHAT
-                || (string)$message['type'] == self::TYPE_HEADLINE)
+            && ((string) $message['type'] == self::TYPE_CHAT
+                || (string) $message['type'] == self::TYPE_ERROR
+                || (string) $message['type'] == self::TYPE_GROUPCHAT
+                || (string) $message['type'] == self::TYPE_HEADLINE)
         ) {
-            $this->type = (string)$message['type'];
+            $this->type = (string) $message['type'];
         } else {
             $this->type = self::TYPE_NORMAL;
         }
 
         if ($this->type == self::TYPE_ERROR) {
             if (isset($message->error[0])) {
-                $this->_error = (string)$message->error[0];
+                $this->_error = (string) $message->error[0];
             } else {
                 $this->_error = '';
             }
         }
 
         if (isset($message['xml:lang'])) {
-            $this->_lang = (string)$message['xml:lang'];
+            $this->_lang = (string) $message['xml:lang'];
         }
 
         foreach ($message->subject as $subject) {
             $thisSubject = array(
-                'content' => (string)$subject,
+                'content' => (string) $subject,
             );
 
             if (isset($subject['xml:lang'])) {
-                $thisSubject['lang'] = (string)$subject['xml:lang'];
+                $thisSubject['lang'] = (string) $subject['xml:lang'];
             }
 
             $this->_subjects[] = $thisSubject;
@@ -93,11 +93,11 @@ class Xmpp_Message extends Xmpp_Stanza
 
         foreach ($message->body as $body) {
             $thisBody = array(
-                'content' => (string)$body,
+                'content' => (string) $body,
             );
 
             if (isset($body['xml:lang'])) {
-                $thisBody['lang'] = (string)$body['xml:lang'];
+                $thisBody['lang'] = (string) $body['xml:lang'];
             }
 
             $this->_bodies[] = $thisBody;
@@ -108,7 +108,7 @@ class Xmpp_Message extends Xmpp_Stanza
         }
 
         if (isset($message->thread[0])) {
-            $this->_thread = (string)$message->thread[0];
+            $this->_thread = (string) $message->thread[0];
         } else {
             $this->_thread = '';
         }
@@ -168,5 +168,4 @@ class Xmpp_Message extends Xmpp_Stanza
     {
         return $this->_delayed;
     }
-
 }
