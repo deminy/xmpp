@@ -28,11 +28,10 @@ class Stream
     /**
      * Creates an instance of the Stream class
      *
-     * @param string $remoteSocket The remote socket to connect to
-     * @param int $timeOut Give up trying to connect after these
-     *                               number of seconds
-     * @param int $flags Connection flags
-     * @param resource $context Context of the stream
+     * @param string $remoteSocket The remote socket to connect to.
+     * @param int $timeOut Give up trying to connect after these number of seconds.
+     * @param int $flags Connection flags.
+     * @param resource $context Context of the stream.
      */
     public function __construct(
         $remoteSocket,
@@ -41,7 +40,6 @@ class Stream
         $context = null,
         \Psr\Log\LoggerInterface $logger
     ) {
-
         $this->_logger = $logger;
 
         // Attempt to make the connection. stream_socket_client needs to be
@@ -185,13 +183,9 @@ class Stream
     public function setTLS($enable)
     {
         if ($enable) {
-            $res = stream_socket_enable_crypto(
-                $this->_conn, true, STREAM_CRYPTO_METHOD_TLS_CLIENT
-            );
+            $res = stream_socket_enable_crypto($this->_conn, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
         } else {
-            $res = stream_socket_enable_crypto(
-                $this->_conn, false, STREAM_CRYPTO_METHOD_TLS_CLIENT
-            );
+            $res = stream_socket_enable_crypto($this->_conn, false, STREAM_CRYPTO_METHOD_TLS_CLIENT);
         }
 
         return $res;

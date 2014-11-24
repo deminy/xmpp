@@ -206,17 +206,18 @@ class Connection
 
             // Start constructing message to send with authentication details in
             // it.
-            $message = 'username="' . $this->_userName . '",'
+            $message =
+                'username="' . $this->_userName . '",'
                 . 'realm="' . $challenge['realm'] . '",'
                 . 'nonce="' . $challenge['nonce'] . '",'
                 . 'cnonce="' . $cnonce . '",nc="00000001",'
                 . 'qop="' . $challenge['qop'] . '",'
                 . 'digest-uri="xmpp/' . $challenge['realm'] . '",'
                 . 'response="' . $z . '",'
-                . 'charset="' . $challenge['charset'] . '"';
+                . 'charset="' . $challenge['charset'] . '"'
+            ;
             $this->_logger->debug('Unencoded Response: ' . $message);
-            $message = "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>"
-                . base64_encode($message) . '</response>';
+            $message = "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($message) . '</response>';
 
             // Send the response
             $this->_logger->debug('Challenge Response: ' . $message);
@@ -543,12 +544,8 @@ class Connection
      *
      * @return Stream
      */
-    protected function getStream(
-        $remoteSocket,
-        $timeOut = null,
-        $flags = null,
-        $context = null
-    ) {
+    protected function getStream($remoteSocket, $timeOut = null, $flags = null, $context = null)
+    {
         return new Stream($remoteSocket, $timeOut, $flags, $context, $this->_logger);
     }
 
@@ -563,7 +560,6 @@ class Connection
      */
     protected function setMechanisms(SimpleXMLElement $features)
     {
-
         // Set up an array to hold any matches
         $matches = array();
 
@@ -571,7 +567,7 @@ class Connection
         // That should contain a mechanisms tag. Find the mechanisms tag and load it
         // into a SimpleXMLElement object.
         if (preg_match(
-            '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/', $features->asXml(), $matches
+            '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/',$features->asXml(), $matches
         ) != 0
         ) {
             // Clear out any existing mechanisms
@@ -617,11 +613,12 @@ class Connection
      */
     public function establishSession()
     {
-
         // Send message requesting start of session.
-        $message = "<iq to='" . $this->_realm . "' type='set' id='sess_1'>"
+        $message =
+            "<iq to='" . $this->_realm . "' type='set' id='sess_1'>"
             . "<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>"
-            . "</iq>";
+            . "</iq>"
+        ;
         $this->_stream->send($message);
 
         // Should now get an iq in response from the server to say the session
@@ -682,7 +679,8 @@ class Connection
                 $message .= '<status>' . $status . '</status>';
             }
 
-            if (!is_null($show) && ($show == self::PRESENCE_AWAY
+            if (!is_null($show)
+                && ($show == self::PRESENCE_AWAY
                     || $show == self::PRESENCE_CHAT || $show == self::PRESENCE_DND
                     || $show == self::PRESENCE_XA)
             ) {
@@ -704,12 +702,10 @@ class Connection
      * Wait for the server to respond.
      *
      * @todo Get this to return after a timeout period if nothing has come back
-     *
      * @return string
      */
     public function wait()
     {
-
         // Wait for any tag to be sent by the server
         $response = $this->waitForServer('*');
 
@@ -733,7 +729,6 @@ class Connection
      */
     public function isMucSupported()
     {
-
         // Set up return value. Assume MUC isn't supported
         $mucSupported = false;
 
@@ -789,19 +784,19 @@ class Connection
     protected function discoverItems()
     {
         // Send IQ stanza asking server what items are associated with it.
-        $message = "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
+        $message =
+            "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
             . $this->_resource . "' id='" . uniqid() . "' "
             . "to='" . $this->_realm . "' type='get'>"
             . "<query xmlns='http://jabber.org/protocol/disco#items'/>"
-            . '</iq>';
+            . '</iq>'
+        ;
         $this->_stream->send($message);
         $this->_logger->debug('Querying for available services');
 
         // Wait for iq response
         $response = false;
-        while (!$response || $response->getName() != 'iq'
-            || strpos($response->asXml(), '<item') === false
-        ) {
+        while (!$response || $response->getName() != 'iq' || strpos($response->asXml(), '<item') === false) {
             $response = $this->waitForServer('iq');
         }
         $this->_logger->debug('Received: ' . $response->asXML());
@@ -839,9 +834,7 @@ class Connection
      */
     public function join($roomJid, $nick, $overRideReservedNick = false)
     {
-
-        // If we shouldn't over ride the reserved nick, check to see if one is
-        // set.
+        // If we shouldn't over ride the reserved nick, check to see if one is set.
         if (!$overRideReservedNick) {
             // Make a request to see if we have a reserved nick name in the room
             // that we want to join.
@@ -853,14 +846,15 @@ class Connection
         }
 
         // Attempt to enter the room by sending it a presence element.
-        $message = "<presence from='" . $this->_userName . '@' . $this->_realm
+        $message =
+            "<presence from='" . $this->_userName . '@' . $this->_realm
             . '/' . $this->_resource . "' to='" . $roomJid . '/' . $nick
-            . "'><x xmlns='http://jabber.org/protocol/muc'/></presence>";
+            . "'><x xmlns='http://jabber.org/protocol/muc'/></presence>"
+        ;
         $this->_stream->send($message);
         $this->_logger->debug('Attempting to join the room ' . $roomJid);
 
-        // Should now get a list of presences back containing the details of all the
-        // other occupants of the room.
+        // Should now get a list of presences back containing the details of all the other occupants of the room.
         $response = false;
         while (!$response) {
             $response = $this->waitForServer('presence');
@@ -885,11 +879,13 @@ class Connection
     protected function requestReservedNickname($roomJid)
     {
 
-        $message = "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
+        $message =
+            "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
             . $this->_resource . "' id='" . uniqid() . "' "
             . "to='" . $roomJid . "' type='get'>"
             . "<query xmlns='http://jabber.org/protocol/disco#info' "
-            . "node='x-roomuser-item'/></iq>";
+            . "node='x-roomuser-item'/></iq>"
+        ;
         $this->_stream->send($message);
         $this->_logger->debug('Querying for reserved nickname in ' . $roomJid);
 
@@ -901,9 +897,7 @@ class Connection
         $this->_logger->debug('Received: ' . $response->asXML());
 
         // If query isn't empty then the user does have a reserved nickname.
-        if (isset($response->query) && count($response->query->children()) > 0
-            && isset($response->query->identity)
-        ) {
+        if (isset($response->query) && count($response->query->children()) > 0 && isset($response->query->identity)) {
             $reservedNick = $response->query->identity->attributes()->name;
         } else {
             $reservedNick = null;
@@ -934,10 +928,12 @@ class Connection
             $type = 'normal';
         }
 
-        $message = "<message to='" . $to . "' from='" . $this->_userName . '@'
+        $message =
+            "<message to='" . $to . "' from='" . $this->_userName . '@'
             . $this->_realm . '/' . $this->_resource . "' type='" . $type
             . "' xml:lang='en'><body>" . $this->encode($text)
-            . "</body></message>";
+            . "</body></message>"
+        ;
         $this->_stream->send($message);
 
         return true;
@@ -1484,11 +1480,13 @@ class Connection
      */
     public function ping($to)
     {
-        $message = "<iq to='" . $to . "' from='" . $this->_userName . '@'
+        $message =
+            "<iq to='" . $to . "' from='" . $this->_userName . '@'
             . $this->_realm . '/' . $this->_resource . "' type='get' "
             . "id='" . uniqid() . "'>"
             . "<ping xmlns='urn:xmpp:ping'/>"
-            . "</iq>";
+            . "</iq>"
+        ;
         $this->_stream->send($message);
 
         return true;
@@ -1504,9 +1502,11 @@ class Connection
      */
     public function pong($to, $id)
     {
-        $message = "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
+        $message =
+            "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
             . $this->_resource . "' to='" . $to . "' id='" . $id . "' "
-            . "type='result'/>";
+            . "type='result'/>"
+        ;
         $this->_stream->send($message);
 
         return true;

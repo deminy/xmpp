@@ -11,7 +11,6 @@ use PHPUnit_Framework_TestCase;
  */
 class ConnectionTest extends PHPUnit_Framework_TestCase
 {
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -20,7 +19,6 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-
     }
 
     /**
@@ -31,8 +29,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
      */
     public function tearDown()
     {
-
-    }
+   }
 
     /**
      * Test for the connect function
@@ -49,30 +46,33 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
             . 'xmlns="jabber:client" version="1.0">';
         $stream->expects($this->at(1))
             ->method('send')
-            ->with($this->equalTo($message));
+            ->with($this->equalTo($message))
+        ;
 
-        // Next we expect to tell the stream to wait for a response from the
-        // server
+        // Next we expect to tell the stream to wait for a response from the server.
         $stream->expects($this->at(2))
             ->method('select')
-            ->will($this->returnValue(1));
+            ->will($this->returnValue(1))
+        ;
 
         // Set up what expect the reponse of the server to be to this
         $message = "<?xml version='1.0' encoding='UTF-8'?>"
             . '<stream:stream '
             . 'xmlns:stream="http://etherx.jabber.org/streams" '
             . 'xmlns="jabber:client" from="test.xmpp.com" '
-            . 'id="e674e243" xml:lang="en" version="1.0">';
+            . 'id="e674e243" xml:lang="en" version="1.0">'
+        ;
         $stream->expects($this->at(3))
             ->method('read')
             ->with($this->equalTo(4096))
-            ->will($this->returnValue($message));
+            ->will($this->returnValue($message))
+        ;
 
-        // Next we expect to tell the stream to wait for a response from the
-        // server
+        // Next we expect to tell the stream to wait for a response from the server.
         $stream->expects($this->at(4))
             ->method('select')
-            ->will($this->returnValue(1));
+            ->will($this->returnValue(1))
+        ;
 
         // Next the server should report what features it supports
         $message = '<stream:features>'
@@ -88,14 +88,15 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
             . '</compression>'
             . '<auth xmlns="http://jabber.org/features/iq-auth"/>'
             . '<register xmlns="http://jabber.org/features/iq-register"/>'
-            . '</stream:features>';
+            . '</stream:features>'
+        ;
         $stream->expects($this->at(5))
             ->method('read')
             ->with($this->equalTo(4096))
-            ->will($this->returnValue($message));
+            ->will($this->returnValue($message))
+        ;
 
-        // Now get a mock of XMPP and replace the _getStream function with a
-        // stub that will return our stream mock.
+        // Now get a mock of XMPP and replace the _getStream function with a stub that will return our stream mock.
         $xmpp = $this->getMockXmppConnection($stream);
         $xmpp->connect();
     }
@@ -126,7 +127,8 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
         $xmpp->expects($this->once())
             ->method('_getStream')
             ->with($this->equalTo('tcp://test.xmpp.com:5222'))
-            ->will($this->returnValue($stream));
+            ->will($this->returnValue($stream))
+        ;
 
         return $xmpp;
     }
@@ -146,12 +148,14 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
         $message = '</stream:stream>';
         $stream->expects($this->at(0))
             ->method('send')
-            ->with($this->equalTo($message));
+            ->with($this->equalTo($message))
+        ;
 
         // Next we expect the Stream to be told to close to the connect
         $stream->expects($this->at(1))
             ->method('disconnect')
-            ->will($this->returnValue(true));
+            ->will($this->returnValue(true))
+        ;
 
         $xmpp = $this->getMockXmppConnection($stream);
         $xmpp->disconnect();
