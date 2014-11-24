@@ -23,8 +23,8 @@ require_once 'Stream.php';
 require_once 'Xmpp/Connection.php';
 
 /**
- * Tests for the XMPP class. Each tests need to mock the Stream object and stub the 
- * _getStream method so that the XMPP class doesn't actually have to connect to 
+ * Tests for the XMPP class. Each tests need to mock the Stream object and stub the
+ * _getStream method so that the XMPP class doesn't actually have to connect to
  * anything.
  *
  * @category  XMPP
@@ -45,7 +45,7 @@ class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        
+
     }
 
     /**
@@ -56,38 +56,7 @@ class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
      */
     public function tearDown()
     {
-        
-    }
 
-    /**
-     * Gets a mock instance of Stream for use in tests.
-     * 
-     * @return type 
-     */
-    public function getMockStream()
-    {
-        return $this->getMock('Stream', array(), array(), '', false);
-    }
-
-    /**
-     * Gets a mock instance of Xmpp_Connection for use in tests.
-     * 
-     * @param Stream $stream A stream to connect with.
-     * 
-     * @return type 
-     */
-    public function getMockXmppConnection(Stream $stream)
-    {
-        $xmpp = $this->getMock(
-            'Xmpp_Connection', array('_getStream'), 
-            array('test@test.server.com', 'testPass', 'test.xmpp.com')
-        );
-        $xmpp->expects($this->once())
-            ->method('_getStream')
-            ->with($this->equalTo('tcp://test.xmpp.com:5222'))
-            ->will($this->returnValue($stream));
-
-        return $xmpp;
     }
 
     /**
@@ -101,8 +70,8 @@ class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
 
         // Set up what we expect the XMPP class to send to the server
         $message = '<stream:stream to="test.xmpp.com" '
-                . 'xmlns:stream="http://etherx.jabber.org/streams" '
-                . 'xmlns="jabber:client" version="1.0">';
+            . 'xmlns:stream="http://etherx.jabber.org/streams" '
+            . 'xmlns="jabber:client" version="1.0">';
         $stream->expects($this->at(1))
             ->method('send')
             ->with($this->equalTo($message));
@@ -115,10 +84,10 @@ class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
 
         // Set up what expect the reponse of the server to be to this
         $message = "<?xml version='1.0' encoding='UTF-8'?>"
-                . '<stream:stream '
-                . 'xmlns:stream="http://etherx.jabber.org/streams" '
-                . 'xmlns="jabber:client" from="test.xmpp.com" '
-                . 'id="e674e243" xml:lang="en" version="1.0">';
+            . '<stream:stream '
+            . 'xmlns:stream="http://etherx.jabber.org/streams" '
+            . 'xmlns="jabber:client" from="test.xmpp.com" '
+            . 'id="e674e243" xml:lang="en" version="1.0">';
         $stream->expects($this->at(3))
             ->method('read')
             ->with($this->equalTo(4096))
@@ -132,19 +101,19 @@ class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
 
         // Next the server should report what features it supports
         $message = '<stream:features>'
-                . '<starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"></starttls>'
-                . '<mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl">'
-                . '<mechanism>DIGEST-MD5</mechanism>'
-                . '<mechanism>PLAIN</mechanism>'
-                . '<mechanism>ANONYMOUS</mechanism>'
-                . '<mechanism>CRAM-MD5</mechanism>'
-                . '</mechanisms>'
-                . '<compression xmlns="http://jabber.org/features/compress">'
-                . '<method>zlib</method>'
-                . '</compression>'
-                . '<auth xmlns="http://jabber.org/features/iq-auth"/>'
-                . '<register xmlns="http://jabber.org/features/iq-register"/>'
-                . '</stream:features>';
+            . '<starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"></starttls>'
+            . '<mechanisms xmlns="urn:ietf:params:xml:ns:xmpp-sasl">'
+            . '<mechanism>DIGEST-MD5</mechanism>'
+            . '<mechanism>PLAIN</mechanism>'
+            . '<mechanism>ANONYMOUS</mechanism>'
+            . '<mechanism>CRAM-MD5</mechanism>'
+            . '</mechanisms>'
+            . '<compression xmlns="http://jabber.org/features/compress">'
+            . '<method>zlib</method>'
+            . '</compression>'
+            . '<auth xmlns="http://jabber.org/features/iq-auth"/>'
+            . '<register xmlns="http://jabber.org/features/iq-register"/>'
+            . '</stream:features>';
         $stream->expects($this->at(5))
             ->method('read')
             ->with($this->equalTo(4096))
@@ -157,8 +126,39 @@ class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Gets a mock instance of Stream for use in tests.
+     *
+     * @return type
+     */
+    public function getMockStream()
+    {
+        return $this->getMock('Stream', array(), array(), '', false);
+    }
+
+    /**
+     * Gets a mock instance of Xmpp_Connection for use in tests.
+     *
+     * @param Stream $stream A stream to connect with.
+     *
+     * @return type
+     */
+    public function getMockXmppConnection(Stream $stream)
+    {
+        $xmpp = $this->getMock(
+            'Xmpp_Connection', array('_getStream'),
+            array('test@test.server.com', 'testPass', 'test.xmpp.com')
+        );
+        $xmpp->expects($this->once())
+            ->method('_getStream')
+            ->with($this->equalTo('tcp://test.xmpp.com:5222'))
+            ->will($this->returnValue($stream));
+
+        return $xmpp;
+    }
+
+    /**
      * Tests disconnecting from an XMPP server.
-     * 
+     *
      * @return void
      */
     public function testDisconnect()

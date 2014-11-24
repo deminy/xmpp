@@ -1,7 +1,7 @@
 <?php
 /**
- * Represents an <iq /> XMPP Stanza. 
- * 
+ * Represents an <iq /> XMPP Stanza.
+ *
  * PHP version 5
  *
  * LICENSE
@@ -20,7 +20,7 @@
  */
 
 /**
- * Represents an <iq /> XMPP Stanza. 
+ * Represents an <iq /> XMPP Stanza.
  *
  * @category Xmpp
  * @package  Xmpp

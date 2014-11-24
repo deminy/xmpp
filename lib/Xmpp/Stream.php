@@ -43,7 +43,6 @@
  * @author   Alex Mace <a@m.me.uk>
  * @license  http://m.me.uk/xmpp/license/ New BSD License
  * @link     http://pear.m.me.uk/package/Xmpp
-
  */
 class Stream
 {
@@ -61,14 +60,18 @@ class Stream
     /**
      * Creates an instance of the Stream class
      *
-     * @param string   $remoteSocket The remote socket to connect to
-     * @param int      $timeOut      Give up trying to connect after these
+     * @param string $remoteSocket The remote socket to connect to
+     * @param int $timeOut Give up trying to connect after these
      *                               number of seconds
-     * @param int      $flags        Connection flags
-     * @param resource $context      Context of the stream
+     * @param int $flags Connection flags
+     * @param resource $context Context of the stream
      */
     public function __construct(
-        $remoteSocket, $timeOut = null, $flags = null, $context = null, \Psr\Log\LoggerInterface $logger
+        $remoteSocket,
+        $timeOut = null,
+        $flags = null,
+        $context = null,
+        \Psr\Log\LoggerInterface $logger
     ) {
 
         $this->_logger = $logger;

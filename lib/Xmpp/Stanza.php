@@ -33,10 +33,10 @@
 abstract class Xmpp_Stanza
 {
 
+    protected $type = null;
     private $_from = null;
     private $_to = null;
-	private $_id = null;
-    protected $type = null;
+    private $_id = null;
 
     /**
      * Class constructor, sets up common class variables.
@@ -47,16 +47,16 @@ abstract class Xmpp_Stanza
     {
 
         if (isset($stanza['from'])) {
-            $this->_from = (string) $stanza['from'];
+            $this->_from = (string)$stanza['from'];
         }
 
         if (isset($stanza['to'])) {
-            $this->_to = (string) $stanza['to'];
+            $this->_to = (string)$stanza['to'];
         }
 
-		if (isset($stanza['id'])) {
-			$this->_id = (string) $stanza['id'];
-		}
+        if (isset($stanza['id'])) {
+            $this->_id = (string)$stanza['id'];
+        }
     }
 
     /**
@@ -89,14 +89,14 @@ abstract class Xmpp_Stanza
         return $this->type;
     }
 
-	/**
-	 * Returns the "id" of the stanza.
-	 *
-	 * @return string
-	 */
-	public function getId()
-	{
-		return $this->_id;
-	}
+    /**
+     * Returns the "id" of the stanza.
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->_id;
+    }
 
 }

@@ -21,7 +21,7 @@
  */
 
 /**
- * Represents an XMPP <message> 
+ * Represents an XMPP <message>
  *
  * @category  XMPP
  * @package   XMPP
@@ -43,11 +43,11 @@ class Xmpp_Message extends Xmpp_Stanza
     private $_lang = null;
     private $_subjects = array();
     private $_thread = null;
-	private $_delayed = false;
+    private $_delayed = false;
 
     /**
      * Class constructor.
-     * 
+     *
      * @param SimpleXMLElement $message The XML of the message.
      */
     public function __construct(SimpleXMLElement $message)
@@ -57,35 +57,35 @@ class Xmpp_Message extends Xmpp_Stanza
 
         // Get the type of the message
         if (isset($message['type'])
-            && ((string) $message['type'] == self::TYPE_CHAT
-            || (string) $message['type'] == self::TYPE_ERROR
-            || (string) $message['type'] == self::TYPE_GROUPCHAT
-            || (string) $message['type'] == self::TYPE_HEADLINE)
+            && ((string)$message['type'] == self::TYPE_CHAT
+                || (string)$message['type'] == self::TYPE_ERROR
+                || (string)$message['type'] == self::TYPE_GROUPCHAT
+                || (string)$message['type'] == self::TYPE_HEADLINE)
         ) {
-            $this->type = (string) $message['type'];
+            $this->type = (string)$message['type'];
         } else {
             $this->type = self::TYPE_NORMAL;
         }
 
         if ($this->type == self::TYPE_ERROR) {
             if (isset($message->error[0])) {
-                $this->_error = (string) $message->error[0];
+                $this->_error = (string)$message->error[0];
             } else {
                 $this->_error = '';
             }
         }
 
         if (isset($message['xml:lang'])) {
-            $this->_lang = (string) $message['xml:lang'];
+            $this->_lang = (string)$message['xml:lang'];
         }
 
         foreach ($message->subject as $subject) {
             $thisSubject = array(
-                'content' => (string) $subject,
+                'content' => (string)$subject,
             );
 
             if (isset($subject['xml:lang'])) {
-                $thisSubject['lang'] = (string) $subject['xml:lang'];
+                $thisSubject['lang'] = (string)$subject['xml:lang'];
             }
 
             $this->_subjects[] = $thisSubject;
@@ -93,22 +93,22 @@ class Xmpp_Message extends Xmpp_Stanza
 
         foreach ($message->body as $body) {
             $thisBody = array(
-                'content' => (string) $body,
+                'content' => (string)$body,
             );
 
             if (isset($body['xml:lang'])) {
-                $thisBody['lang'] = (string) $body['xml:lang'];
+                $thisBody['lang'] = (string)$body['xml:lang'];
             }
 
             $this->_bodies[] = $thisBody;
         }
-		
-		if (isset($message->delay[0])) {
-			$this->_delayed = true;
-		}
+
+        if (isset($message->delay[0])) {
+            $this->_delayed = true;
+        }
 
         if (isset($message->thread[0])) {
-            $this->_thread = (string) $message->thread[0];
+            $this->_thread = (string)$message->thread[0];
         } else {
             $this->_thread = '';
         }
@@ -116,8 +116,8 @@ class Xmpp_Message extends Xmpp_Stanza
 
     /**
      * Gets the bodies contained in the message.
-     * 
-     * @return type 
+     *
+     * @return type
      */
     public function getBodies()
     {
@@ -126,8 +126,8 @@ class Xmpp_Message extends Xmpp_Stanza
 
     /**
      * Gets the error associated with this message.
-     * 
-     * @return type 
+     *
+     * @return type
      */
     public function getError()
     {
@@ -136,8 +136,8 @@ class Xmpp_Message extends Xmpp_Stanza
 
     /**
      * Gets the language of the message.
-     * 
-     * @return type 
+     *
+     * @return type
      */
     public function getLang()
     {
@@ -146,8 +146,8 @@ class Xmpp_Message extends Xmpp_Stanza
 
     /**
      * Gets the subjects of the message.
-     * 
-     * @return type 
+     *
+     * @return type
      */
     public function getSubjects()
     {
@@ -156,17 +156,17 @@ class Xmpp_Message extends Xmpp_Stanza
 
     /**
      * Gets the thread the message is associated with.
-     * 
-     * @return type 
+     *
+     * @return type
      */
     public function getThread()
     {
         return $this->_thread;
     }
-	
-	public function isDelayed()
-	{
-		return $this->_delayed;
-	}
+
+    public function isDelayed()
+    {
+        return $this->_delayed;
+    }
 
 }
