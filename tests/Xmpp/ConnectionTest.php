@@ -111,7 +111,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Gets a mock instance of Xmpp_Connection for use in tests.
+     * Gets a mock instance of \Xmpp\Connection for use in tests.
      *
      * @param Stream $stream A stream to connect with.
      *
@@ -120,7 +120,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
     public function getMockXmppConnection(Stream $stream)
     {
         $xmpp = $this->getMock(
-            'Xmpp_Connection', array('_getStream'),
+            '\\Xmpp\\Connection', array('_getStream'),
             array('test@test.server.com', 'testPass', 'test.xmpp.com')
         );
         $xmpp->expects($this->once())
@@ -140,7 +140,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
     {
         $stream = $this->getMockStream();
 
-        // Setup what we expect the Xmpp_Connection class to send to the server.
+        // Setup what we expect the \Xmpp\Connection class to send to the server.
         // Disconnecting from the server should basically just be sending a
         // closing stream tag followed by disconnection.
         $message = '</stream:stream>';

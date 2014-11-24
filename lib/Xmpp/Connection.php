@@ -13,7 +13,7 @@ namespace Xmpp;
  * @todo Throw exceptions when attempting to perform actions that the server has
  *         not reported that they support.
  * @todo ->wait() method should return a class that encapsulates what has come
- *         from the server. e.g. Xmpp_Message Xmpp_Iq Xmpp_Presence
+ *         from the server. e.g. Message Iq Xmpp_Presence
  */
 class Connection
 {
@@ -302,7 +302,7 @@ class Connection
                 }
             }
 
-            $this->_logger->debug('Response (Xmpp_Connection): ' . $response);
+            $this->_logger->debug('Response (\Xmpp\Connection): ' . $response);
 
             // If the response isn't empty, load it into a SimpleXML element
             if (trim($response) != '') {
@@ -516,7 +516,7 @@ class Connection
         } catch (Stream_Exception $e) {
             // A Stream Exception occured. Catch it and rethrow it as an Xmpp
             // Exception.
-            throw new Xmpp_Exception('Failed to connect: ' . $e->getMessage());
+            throw new Exception('Failed to connect: ' . $e->getMessage());
         }
 
         return true;
@@ -633,31 +633,31 @@ class Connection
     }
 
     /**
-     * Get the last response as an instance of Xmpp_Iq.
+     * Get the last response as an instance of \Xmpp\Iq.
      *
      * @return Iq
      */
     public function getIq()
     {
         if ((string) $this->_lastResponse->getName() != 'iq') {
-            throw new Xmpp_Exception('Last stanza received was not an iq stanza');
+            throw new Exception('Last stanza received was not an iq stanza');
         }
 
-        return new Xmpp_Iq($this->_lastResponse);
+        return new Iq($this->_lastResponse);
     }
 
     /**
-     * Get the last response an an instance of Xmpp_Message.
+     * Get the last response an an instance of \Xmpp\Message.
      *
-     * @return Xmpp_Message
+     * @return Message
      */
     public function getMessage()
     {
         if ((string) $this->_lastResponse->getName() != 'message') {
-            throw new Xmpp_Exception('Last stanza received was not a message');
+            throw new Exception('Last stanza received was not a message');
         }
 
-        return new Xmpp_Message($this->_lastResponse);
+        return new Message($this->_lastResponse);
     }
 
     /**
