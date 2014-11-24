@@ -5,7 +5,7 @@ namespace Xmpp;
 /**
  * Abstract class for representing Xmpp Stanzas.
  */
-abstract class Xmpp_Stanza
+abstract class Stanza
 {
 
     protected $type = null;

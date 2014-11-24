@@ -1,14 +1,15 @@
 <?php
 
-require_once 'Stream.php';
-require_once 'Xmpp/Connection.php';
+namespace Xmpp;
+
+use PHPUnit_Framework_TestCase;
 
 /**
  * Tests for the XMPP class. Each tests need to mock the Stream object and stub the
  * _getStream method so that the XMPP class doesn't actually have to connect to
  * anything.
  */
-class Xmpp_ConnectionTest extends PHPUnit_Framework_TestCase
+class ConnectionTest extends PHPUnit_Framework_TestCase
 {
 
     /**

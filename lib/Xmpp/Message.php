@@ -5,7 +5,7 @@ namespace Xmpp;
 /**
  * Represents an XMPP <message>
  */
-class Xmpp_Message extends Xmpp_Stanza
+class Message extends Stanza
 {
     const TYPE_CHAT = 'chat';
     const TYPE_ERROR = 'error';
