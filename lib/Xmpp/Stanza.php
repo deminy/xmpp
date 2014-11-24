@@ -7,11 +7,25 @@ namespace Xmpp;
  */
 abstract class Stanza
 {
+    /**
+     * @var string
+     */
+    protected $type;
 
-    protected $type = null;
-    private $_from = null;
-    private $_to = null;
-    private $_id = null;
+    /**
+     * @var string
+     */
+    protected $_from;
+
+    /**
+     * @var string
+     */
+    protected $_to;
+
+    /**
+     * @var string
+     */
+    protected $_id;
 
     /**
      * Class constructor, sets up common class variables.

@@ -13,12 +13,19 @@ class Message extends Stanza
     const TYPE_HEADLINE = 'headline';
     const TYPE_NORMAL = 'normal';
 
-    private $_bodies = array();
-    private $_error = null;
-    private $_lang = null;
-    private $_subjects = array();
-    private $_thread = null;
-    private $_delayed = false;
+    /**
+     * @var array
+     */
+    protected $_bodies = array();
+    protected $_error;
+    protected $_lang;
+
+    /**
+     * @var array
+     */
+    protected $_subjects = array();
+    protected $_thread;
+    protected $_delayed = false;
 
     /**
      * Class constructor.
@@ -92,7 +99,7 @@ class Message extends Stanza
     /**
      * Gets the bodies contained in the message.
      *
-     * @return type
+     * @return array
      */
     public function getBodies()
     {
@@ -122,7 +129,7 @@ class Message extends Stanza
     /**
      * Gets the subjects of the message.
      *
-     * @return type
+     * @return array
      */
     public function getSubjects()
     {
@@ -139,6 +146,9 @@ class Message extends Stanza
         return $this->_thread;
     }
 
+    /**
+     * @return bool
+     */
     public function isDelayed()
     {
         return $this->_delayed;

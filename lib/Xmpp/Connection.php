@@ -41,38 +41,45 @@ class Connection
      *
      * @var array
      */
-    private $_buffer = array();
+    protected $_buffer = array();
 
     /**
      * Host name of the server to connect to
      *
      * @var string
      */
-    private $_host = null;
+    protected $_host = null;
 
-    private $_lastResponse = null;
+    /**
+     * @var SimpleXMLElement
+     */
+    protected $_lastResponse = null;
 
     /**
      * Class that performs logging
      *
      * @var \Psr\Log\LoggerInterface
      */
-    private $_logger = null;
-    private $_mechanisms = array();
+    protected $_logger = null;
+
+    /**
+     * @var array
+     */
+    protected $_mechanisms = array();
 
     /**
      * Holds the password of the user we are going to connect with
      *
      * @var string
      */
-    private $_password = null;
+    protected $_password = null;
 
     /**
      * Holds the port of the server to connect to
      *
      * @var int
      */
-    private $_port = null;
+    protected $_port = null;
 
     /**
      * Holds the "realm" of the user name. Usually refers to the domain in the
@@ -80,7 +87,7 @@ class Connection
      *
      * @var string
      */
-    private $_realm = '';
+    protected $_realm = '';
 
     /**
      * Holds the resource for the connection. Will be something like a machine
@@ -88,28 +95,28 @@ class Connection
      *
      * @var string
      */
-    private $_resource = '';
+    protected $_resource = '';
 
     /**
      * Whether or not this connection to switch SSL when it is available.
      *
      * @var boolean
      */
-    private $_ssl = true;
+    protected $_ssl = true;
 
     /**
      * Holds the Stream object that performs the actual connection to the server
      *
      * @var Stream
      */
-    private $_stream = null;
+    protected $_stream = null;
 
     /**
      * Holds the username used for authentication with the server
      *
      * @var string
      */
-    private $_userName = null;
+    protected $_userName = null;
 
     /**
      * Class constructor

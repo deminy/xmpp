@@ -14,11 +14,25 @@ namespace Xmpp;
  */
 class Stream
 {
+    /**
+     * @var resource
+     */
+    protected $_conn;
 
-    private $_conn = null;
-    private $_connected = false;
-    private $_errorNumber = 0;
-    private $_errorString = '';
+    /**
+     * @var bool
+     */
+    protected $_connected = false;
+
+    /**
+     * @var int
+     */
+    protected $_errorNumber = 0;
+
+    /**
+     * @var string
+     */
+    protected $_errorString = '';
 
     /**
      * @var \Psr\Log\LoggerInterface
