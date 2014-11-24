@@ -448,6 +448,7 @@ class Connection
      * Connects to the server and upgrades to TLS connection if possible.
      *
      * @return void
+     * @throws Exception
      */
     public function connect()
     {
@@ -521,9 +522,8 @@ class Connection
                 // Set mechanisms based on that tag
                 $this->setMechanisms($response);
             }
-        } catch (Stream_Exception $e) {
-            // A Stream Exception occured. Catch it and rethrow it as an Xmpp
-            // Exception.
+        } catch (StreamException $e) {
+            // A Stream Exception occured. Catch it and rethrow it as an Xmpp Exception.
             throw new Exception('Failed to connect: ' . $e->getMessage());
         }
 
@@ -541,14 +541,12 @@ class Connection
     }
 
     /**
-     * Gets a Stream object that encapsulates the actual connection to the
-     * server
+     * Gets a Stream object that encapsulates the actual connection to the server.
      *
      * @param string $remoteSocket Address to connect to
      * @param int $timeOut Length of time to wait for connection
      * @param int $flags Flags to be set on the connection
      * @param resource $context Context of the connection
-     *
      * @return Stream
      */
     protected function getStream($remoteSocket, $timeOut = null, $flags = null, $context = null)
@@ -557,12 +555,9 @@ class Connection
     }
 
     /**
-     * Take the given features tag and figure out what authentication mechanisms are
-     * supported from it's contents.
+     * Take the given features tag and figure out what authentication mechanisms are supported from it's contents.
      *
-     * @param SimpleXMLElement $features <stream:features> saying what server
-     *                                   supports
-     *
+     * @param SimpleXMLElement $features <stream:features> saying what server supports.
      * @return void
      */
     protected function setMechanisms(SimpleXMLElement $features)
@@ -628,8 +623,7 @@ class Connection
         ;
         $this->_stream->send($message);
 
-        // Should now get an iq in response from the server to say the session
-        // was established.
+        // Should now get an iq in response from the server to say the session was established.
         $response = $this->waitForServer('iq');
         $this->_logger->debug('Received: ' . $response->asXML());
 
@@ -640,6 +634,7 @@ class Connection
      * Get the last response as an instance of \Xmpp\Iq.
      *
      * @return Iq
+     * @throws Exception
      */
     public function getIq()
     {
@@ -654,6 +649,7 @@ class Connection
      * Get the last response an an instance of \Xmpp\Message.
      *
      * @return Message
+     * @throws Exception
      */
     public function getMessage()
     {
@@ -670,10 +666,8 @@ class Connection
      * @param string $status Custom status string
      * @param string $show Current state of user, e.g. away, do not disturb
      * @param int $priority Presence priority
-     *
-     * @todo Allow multiple statuses to be entered
-     *
      * @return boolean
+     * @todo Allow multiple statuses to be entered
      */
     public function presence($status = null, $show = null, $priority = null)
     {
@@ -708,8 +702,8 @@ class Connection
     /**
      * Wait for the server to respond.
      *
-     * @todo Get this to return after a timeout period if nothing has come back
      * @return string
+     * @todo Get this to return after a timeout period if nothing has come back
      */
     public function wait()
     {
@@ -766,8 +760,7 @@ class Connection
             }
             $this->_logger->debug('Received: ' . $response->asXML());
 
-            // Check if feature tag with appropriate var value is in response.
-            // If it is, then MUC is supported
+            // Check if feature tag with appropriate var value is in response. If it is, then MUC is supported
             if (isset($response->query)) {
                 foreach ($response->query->children() as $feature) {
                     if ($feature->getName() == 'feature'
@@ -808,8 +801,7 @@ class Connection
         }
         $this->_logger->debug('Received: ' . $response->asXML());
 
-        // Check if query tag is in response. If it is, then iterate over the
-        // children to get the items available.
+        // Check if query tag is in response. If it is, then iterate over the children to get the items available.
         if (isset($response->query)) {
             foreach ($response->query->children() as $item) {
                 if ($item->getName() == 'item'
@@ -833,18 +825,16 @@ class Connection
     /**
      * Join a MUC Room.
      *
-     * @param type $roomJid Room to join.
-     * @param type $nick Nickname to join as.
-     * @param type $overRideReservedNick Override the server assigned nickname.
-     *
+     * @param string $roomJid Room to join.
+     * @param string $nick Nickname to join as.
+     * @param boolean $overRideReservedNick Override the server assigned nickname.
      * @return boolean
      */
     public function join($roomJid, $nick, $overRideReservedNick = false)
     {
         // If we shouldn't over ride the reserved nick, check to see if one is set.
         if (!$overRideReservedNick) {
-            // Make a request to see if we have a reserved nick name in the room
-            // that we want to join.
+            // Make a request to see if we have a reserved nick name in the room that we want to join.
             $reservedNick = $this->requestReservedNickname($roomJid);
 
             if (!is_null($reservedNick)) {
@@ -1483,6 +1473,7 @@ class Connection
     /**
      * Send a ping to the server.
      *
+     * @param string $to
      * @return boolean
      */
     public function ping($to)
@@ -1504,7 +1495,6 @@ class Connection
      *
      * @param string $to Who the response is being sent back to.
      * @param string $id The ID from the original ping.
-     *
      * @return boolean
      */
     public function pong($to, $id)

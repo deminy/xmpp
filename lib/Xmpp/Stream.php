@@ -3,14 +3,8 @@
 namespace Xmpp;
 
 /**
- * Stream
- *
- * Stream is a wrapper for the PHP steam functions
- */
-
-/**
- * The Stream class wraps up the stream functions, so you can pass around the
- * stream as an object and perform operations on it.
+ * The Stream class wraps up the stream functions, so you can pass around the stream as an object and perform operations
+ * on it.
  */
 class Stream
 {
@@ -56,8 +50,10 @@ class Stream
     ) {
         $this->_logger = $logger;
 
-        // Attempt to make the connection. stream_socket_client needs to be
-        // called in the correct way based on what we have been passed.
+        /**
+         * Attempt to make the connection. stream_socket_client needs to be called in the correct way based on what we
+         * have been passed.
+         */
         if (is_null($timeOut) && is_null($flags) && is_null($context)) {
             $this->_conn = stream_socket_client(
                 $remoteSocket, $this->_errorNumber, $this->_errorString
@@ -83,7 +79,7 @@ class Stream
         // yet be invalid. e.g. UDP connections are "connectionless" and not
         // actually made until they are required.
         if ($this->_conn === false) {
-            throw new Stream_Exception($this->_errorString, $this->_errorNumber);
+            throw new StreamException($this->_errorString, $this->_errorNumber);
         }
 
         // Set the time out of the stream.
@@ -128,10 +124,9 @@ class Stream
     }
 
     /**
-     * Attempts to read some data from the stream
+     * Attempts to read some data from the stream.
      *
      * @param int $length The amount of data to be returned
-     *
      * @return string
      */
     public function read($length)
@@ -154,11 +149,10 @@ class Stream
     }
 
     /**
-     * Will sent the message passed in down the stream
+     * Will sent the message passed in down the stream.
      *
-     * @param string $message Content to be sent down the stream
-     *
-     * @return int The number of bytes sent
+     * @param string $message Content to be sent down the stream.
+     * @return int The number of bytes sent.
      */
     public function send($message)
     {
@@ -170,10 +164,9 @@ class Stream
     }
 
     /**
-     * Turns blocking on or off on the stream
+     * Turns blocking on or off on the stream.
      *
      * @param boolean $enable Set what to do with blocking, turn it on or off.
-     *
      * @return boolean
      */
     public function setBlocking($enable)
@@ -191,7 +184,6 @@ class Stream
      * Toggle whether or not TLS is use on the connection.
      *
      * @param boolean $enable Whether or not to turn on TLS.
-     *
      * @return mixed
      */
     public function setTLS($enable)
