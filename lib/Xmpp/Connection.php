@@ -126,8 +126,7 @@ class Connection
      * @param string $userName Username to authenticate with
      * @param string $password Password to authenticate with
      * @param string $host Host name of the server to connect to
-     * @param int $ssl Whether or not to connect over SSL if it is
-     *                         available.
+     * @param boolean $ssl Whether or not to connect over SSL if it is available.
      * @param LoggerInterface $logger
      * @param int $port Port to use for the connection
      * @param string $resource Identifier of the connection
@@ -197,14 +196,10 @@ class Connection
             }
 
             $cnonce = uniqid();
-            $a1 = pack(
-                'H32',
-                md5(
-                    $this->_userName . ':' . $challenge['realm'] . ':' .
-                    $this->_password
-                )
-            )
-                . ':' . $challenge['nonce'] . ':' . $cnonce;
+            $a1 =
+                pack('H32', md5($this->_userName . ':' . $challenge['realm'] . ':' . $this->_password)) .
+                ':' . $challenge['nonce'] . ':' . $cnonce
+            ;
 
             $a2 = 'AUTHENTICATE:xmpp/' . $challenge['realm'];
             $ha1 = md5($a1);
@@ -213,8 +208,7 @@ class Connection
                 . $cnonce . ':' . $challenge['qop'] . ':' . $ha2;
             $z = md5($kd);
 
-            // Start constructing message to send with authentication details in
-            // it.
+            // Start constructing message to send with authentication details in it.
             $message =
                 'username="' . $this->_userName . '",'
                 . 'realm="' . $challenge['realm'] . '",'
@@ -238,8 +232,7 @@ class Connection
             $response = $this->waitForServer('*');
             $this->_logger->debug('Response: ' . $response->asXML());
 
-            // If we have got a challenge, we need to send a response, blank
-            // this time.
+            // If we have got a challenge, we need to send a response, blank this time.
             if ($response->getName() == 'challenge') {
                 $message = "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>";
 
@@ -253,8 +246,7 @@ class Connection
             }
 
 
-            // Now that we have been authenticated, a new stream needs to be
-            // started.
+            // Now that we have been authenticated, a new stream needs to be started.
             $this->startStream();
 
             // Server should now respond with start of stream and list of features
@@ -276,7 +268,6 @@ class Connection
      * Checks if a given authentication mechanism is available.
      *
      * @param string $mechanism Mechanism to check availability for.
-     *
      * @return boolean
      */
     protected function mechanismAvailable($mechanism)
@@ -288,7 +279,6 @@ class Connection
      * Waits for the server to send the specified tag back.
      *
      * @param string $tag Tag to wait for from the server.
-     *
      * @return boolean|SimpleXMLElement
      */
     protected function waitForServer($tag)
@@ -331,8 +321,7 @@ class Connection
                     $offset = 0;
                 }
 
-                // Check if first part of the actual response starts with
-                // <stream:stream
+                // Check if first part of the actual response starts with <stream:stream
                 if (strpos($response, '<stream:stream ') === $offset) {
                     // If so, append a closing tag
                     $response .= '</stream:stream>';
@@ -362,8 +351,7 @@ class Connection
 
                 $xml = simplexml_load_string($response);
 
-                // If we want the stream element itself, just return that,
-                // otherwise check the contents of the stream.
+                // If we want the stream element itself, just return that, otherwise check the contents of the stream.
                 if ($tag == 'stream:stream') {
                     $fromServer = $xml;
                 } elseif ($xml instanceof SimpleXMLElement
@@ -393,8 +381,7 @@ class Connection
         foreach ($this->_buffer as $key => $stanza) {
             // Only bother looking for more tags if one has not yet been found.
             if ($fromServer === false) {
-                // Remove this element from the buffer because we do not want it to
-                // be processed again.
+                // Remove this element from the buffer because we do not want it to be processed again.
                 unset($this->_buffer[$key]);
 
                 // If this the tag we want, save it for returning.
@@ -487,8 +474,7 @@ class Connection
                 // need to change to a secure connection. It will also tell us what
                 // authentication methods it supports.
                 //
-                // Note we check for a "features" tag rather than stream:features
-                // because it is namespaced.
+                // Note we check for a "features" tag rather than stream:features because it is namespaced.
                 $response = $this->waitForServer('features');
                 $this->_logger->debug('Received: ' . $response);
             }
@@ -516,8 +502,7 @@ class Connection
                 // Now we need to start a new stream again.
                 $this->startStream();
 
-                // Server should now respond with start of stream and list of
-                // features
+                // Server should now respond with start of stream and list of features
                 $response = $this->waitForServer('stream:stream');
                 $this->_logger->debug('Received: ' . $response);
 
@@ -570,10 +555,7 @@ class Connection
         // A response containing a stream:features tag should have been passed in.
         // That should contain a mechanisms tag. Find the mechanisms tag and load it
         // into a SimpleXMLElement object.
-        if (preg_match(
-            '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/',$features->asXml(), $matches
-        ) != 0
-        ) {
+        if (preg_match('/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/',$features->asXml(), $matches)) {
             // Clear out any existing mechanisms
             $this->_mechanisms = array();
 
@@ -715,14 +697,8 @@ class Connection
         // Store the last response
         $this->_lastResponse = $response;
 
-        if ($response !== false) {
-            $tag = $this->_lastResponse->getName();
-        } else {
-            $tag = null;
-        }
-
         // Return what type of tag has come back
-        return $tag;
+        return (false === $response) ? null : $this->_lastResponse->getName();
     }
 
     /**
@@ -806,7 +782,7 @@ class Connection
         // Check if query tag is in response. If it is, then iterate over the children to get the items available.
         if (isset($response->query)) {
             foreach ($response->query->children() as $item) {
-                if ($item->getName() == 'item'
+                if (($item->getName() == 'item')
                     && isset($item->attributes()->jid)
                     && isset($item->attributes()->name)
                 ) {
@@ -981,7 +957,7 @@ class Connection
      * Send a ping to the server.
      *
      * @param string $to
-     * @return boolean
+     * @return void
      */
     public function ping($to)
     {
@@ -993,8 +969,6 @@ class Connection
             . "</iq>"
         ;
         $this->_stream->send($message);
-
-        return true;
     }
 
     /**
@@ -1002,7 +976,7 @@ class Connection
      *
      * @param string $to Who the response is being sent back to.
      * @param string $id The ID from the original ping.
-     * @return boolean
+     * @return void
      */
     public function pong($to, $id)
     {
@@ -1012,8 +986,6 @@ class Connection
             . "type='result'/>"
         ;
         $this->_stream->send($message);
-
-        return true;
     }
 
     /**
