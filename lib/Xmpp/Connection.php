@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmpp;
+
 /**
  * Xmpp is an implementation of the Xmpp protocol. Note that creating the class
  * does not connect to the server specified in the constructor. You need to call

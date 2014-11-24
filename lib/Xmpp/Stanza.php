@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmpp;
+
 /**
  * Abstract class for representing Xmpp Stanzas.
  */

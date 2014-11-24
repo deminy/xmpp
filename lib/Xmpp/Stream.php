@@ -1,5 +1,7 @@
 <?php
 
+namespace Xmpp;
+
 /**
  * Stream
  *
