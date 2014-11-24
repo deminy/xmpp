@@ -1,0 +1,21 @@
+{
+    "name": "deminy/xmpp",
+    "description": "A client library for talking to XMPP servers.",
+    "license": "MIT",
+    "keywords": [
+        "php",
+        "xmpp",
+        "jabber",
+        "im"
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "authors": [
+        {
+            "name": "Demin Yin",
+            "email": "deminy@deminy.net",
+            "homepage": "http://deminy.net"
+        }
+    ]
+}
