@@ -15,36 +15,41 @@ namespace Xmpp;
  * @todo ->wait() method should return a class that encapsulates what has come
  *         from the server. e.g. Xmpp_Message Xmpp_Iq Xmpp_Presence
  */
-class Xmpp_Connection
+class Connection
 {
     const PRESENCE_AWAY = 'away';
     const PRESENCE_CHAT = 'chat';
-    const PRESENCE_DND = 'dnd';
-    const PRESENCE_XA = 'xa';
+    const PRESENCE_DND  = 'dnd';
+    const PRESENCE_XA   = 'xa';
+
     /**
      * List of items available on the server
      *
      * @var array
      */
     protected $items = null;
+
     /**
      * Holds an array of rooms that have been joined on this connection.
      *
      * @var array
      */
     protected $joinedRooms = array();
+
     /**
      * Holds the buffer of incoming tags
      *
      * @var array
      */
     private $_buffer = array();
+
     /**
      * Host name of the server to connect to
      *
      * @var string
      */
     private $_host = null;
+
     private $_lastResponse = null;
 
     /**
@@ -150,7 +155,7 @@ class Xmpp_Connection
     {
         // Check that the server said that DIGEST-MD5 was available
         if ($this->mechanismAvailable('DIGEST-MD5')) {
-// Send message to the server that we want to authenticate
+            // Send message to the server that we want to authenticate
             $message = "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' "
                 . "mechanism='DIGEST-MD5'/>";
             $this->_logger->debug('Requesting Authentication: ' . $message);
@@ -301,7 +306,7 @@ class Xmpp_Connection
 
             // If the response isn't empty, load it into a SimpleXML element
             if (trim($response) != '') {
-// If the response from the server starts (where "starts
+                // If the response from the server starts (where "starts
                 // with" means "appears after the xml prologue if one is
                 // present") with "<stream:stream and it doesn't have a
                 // closing "</stream:stream>" then we should append one so
@@ -354,7 +359,7 @@ class Xmpp_Connection
                 } elseif ($xml instanceof SimpleXMLElement
                     && $xml->getName() == 'stream'
                 ) {
-// Get the namespaces used at the root level of the
+                    // Get the namespaces used at the root level of the
                     // document. Add a blank namespace on for anything that
                     // isn't namespaced. Then we can iterate over all of the
                     // elements in the doc.
@@ -376,9 +381,9 @@ class Xmpp_Connection
 
         // Now go over what is in the buffer and return anything necessary
         foreach ($this->_buffer as $key => $stanza) {
-// Only bother looking for more tags if one has not yet been found.
+            // Only bother looking for more tags if one has not yet been found.
             if ($fromServer === false) {
-// Remove this element from the buffer because we do not want it to
+                // Remove this element from the buffer because we do not want it to
                 // be processed again.
                 unset($this->_buffer[$key]);
 
@@ -432,7 +437,7 @@ class Xmpp_Connection
     }
 
     /**
-     * Connects to the server and upgrades to TLS connection if possible
+     * Connects to the server and upgrades to TLS connection if possible.
      *
      * @return void
      */
@@ -442,7 +447,7 @@ class Xmpp_Connection
         $server = $this->getServer();
 
         try {
-// Get a connection to server
+            // Get a connection to server
             $this->_stream = $this->getStream($server);
             $this->_logger->debug('Connection made');
 
@@ -466,7 +471,7 @@ class Xmpp_Connection
             // TODO - Xpath would probably be more sensible for this, but for
             // now this'll work.
             if (strpos($response->asXml(), '<stream:features') === false) {
-// Server should now send back a features tag telling us what
+                // Server should now send back a features tag telling us what
                 // features it supports. If it tells us to start tls then we will
                 // need to change to a secure connection. It will also tell us what
                 // authentication methods it supports.
@@ -569,7 +574,7 @@ class Xmpp_Connection
             '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/', $features->asXml(), $matches
         ) != 0
         ) {
-// Clear out any existing mechanisms
+            // Clear out any existing mechanisms
             $this->_mechanisms = array();
 
             // Create SimpleXMLElement
@@ -630,7 +635,7 @@ class Xmpp_Connection
     /**
      * Get the last response as an instance of Xmpp_Iq.
      *
-     * @return Xmpp_Iq
+     * @return Iq
      */
     public function getIq()
     {
@@ -743,7 +748,7 @@ class Xmpp_Connection
         $items[] = array('jid' => $this->_realm);
 
         foreach ($items as $item) {
-// Send iq stanza asking if this server supports MUC.
+            // Send iq stanza asking if this server supports MUC.
             $message = "<iq from='" . $this->_userName . '@' . $this->_realm . '/'
                 . $this->_resource . "' id='disco1' "
                 . "to='" . $item['jid'] . "' type='get'>"
@@ -809,7 +814,7 @@ class Xmpp_Connection
                     && isset($item->attributes()->jid)
                     && isset($item->attributes()->name)
                 ) {
-// If items is null then we need to turn it into an array.
+                    // If items is null then we need to turn it into an array.
                     if (is_null($this->items)) {
                         $this->items = array();
                     }
