@@ -1,6 +1,6 @@
 <?php
 
-namespace Xmpp;
+namespace Xmpp\Exception;
 
 use Exception;
 

@@ -3,6 +3,8 @@
 namespace Xmpp;
 
 use Psr\Log\LoggerInterface;
+use Xmpp\Exception\StreamException;
+use Xmpp\Exception\XmppException;
 
 /**
  * Xmpp is an implementation of the Xmpp protocol. Note that creating the class

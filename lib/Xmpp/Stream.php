@@ -3,6 +3,7 @@
 namespace Xmpp;
 
 use Psr\Log\LoggerInterface;
+use Xmpp\Exception\StreamException;
 
 /**
  * The Stream class wraps up the stream functions, so you can pass around the stream as an object and perform operations
