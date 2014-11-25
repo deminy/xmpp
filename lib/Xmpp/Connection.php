@@ -431,7 +431,7 @@ class Connection
      * Connects to the server and upgrades to TLS connection if possible.
      *
      * @return void
-     * @throws Exception
+     * @throws XmppException
      */
     public function connect()
     {
@@ -505,7 +505,7 @@ class Connection
             }
         } catch (StreamException $e) {
             // A Stream Exception occured. Catch it and rethrow it as an Xmpp Exception.
-            throw new Exception('Failed to connect: ' . $e->getMessage());
+            throw new XmppException('Failed to connect: ' . $e->getMessage());
         }
 
         return true;
@@ -621,12 +621,12 @@ class Connection
      * Get the last response as an instance of \Xmpp\Iq.
      *
      * @return Iq
-     * @throws Exception
+     * @throws XmppException
      */
     public function getIq()
     {
         if ((string) $this->lastResponse->getName() != 'iq') {
-            throw new Exception('Last stanza received was not an iq stanza');
+            throw new XmppException('Last stanza received was not an iq stanza');
         }
 
         return new Iq($this->lastResponse);
@@ -636,12 +636,12 @@ class Connection
      * Get the last response an an instance of \Xmpp\Message.
      *
      * @return Message
-     * @throws Exception
+     * @throws XmppException
      */
     public function getMessage()
     {
         if ((string) $this->lastResponse->getName() != 'message') {
-            throw new Exception('Last stanza received was not a message');
+            throw new XmppException('Last stanza received was not a message');
         }
 
         return new Message($this->lastResponse);
