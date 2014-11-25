@@ -123,16 +123,16 @@ class Connection
     /**
      * Class constructor.
      *
-     * @param string $userName Username to authenticate with
-     * @param string $password Password to authenticate with
-     * @param string $host Host name of the server to connect to
+     * @param string $username Username to authenticate with.
+     * @param string $password Password to authenticate with.
+     * @param string $host Host name of the server to connect to.
      * @param boolean $ssl Whether or not to connect over SSL if it is available.
-     * @param int $port Port to use for the connection
-     * @param string $resource Identifier of the connection
+     * @param int $port Port to use for the connection.
+     * @param string $resource Identifier of the connection.
      * @param LoggerInterface $logger
      */
     public function __construct(
-        $userName,
+        $username,
         $password,
         $host,
         $ssl = true,
@@ -140,7 +140,7 @@ class Connection
         $resource = 'NewXmpp',
         LoggerInterface $logger
     ) {
-        list($this->_userName, $this->_realm) = array_pad(explode('@', $userName), 2, null);
+        list($this->username, $this->realm) = array_pad(explode('@', $username), 2, null);
 
         $this->host     = $host;
         $this->password = $password;
@@ -281,7 +281,6 @@ class Connection
      */
     protected function waitForServer($tag)
     {
-
         $this->logger->debug("Tag we're waiting for: " . $tag);
 
         $fromServer = false;
@@ -352,9 +351,7 @@ class Connection
                 // If we want the stream element itself, just return that, otherwise check the contents of the stream.
                 if ($tag == 'stream:stream') {
                     $fromServer = $xml;
-                } elseif ($xml instanceof SimpleXMLElement
-                    && $xml->getName() == 'stream'
-                ) {
+                } elseif (($xml instanceof SimpleXMLElement) && ($xml->getName() == 'stream')) {
                     // Get the namespaces used at the root level of the
                     // document. Add a blank namespace on for anything that
                     // isn't namespaced. Then we can iterate over all of the
@@ -373,7 +370,7 @@ class Connection
         }
 
         $this->logger->debug('Contents of $fromServer: ' . var_export($fromServer, true));
-        $this->logger->debug('Contents of $this->_buffer before foreach: ' . var_export($this->buffer, true));
+        $this->logger->debug('Contents of $this->buffer before foreach: ' . var_export($this->buffer, true));
 
         // Now go over what is in the buffer and return anything necessary
         foreach ($this->buffer as $key => $stanza) {
@@ -386,11 +383,10 @@ class Connection
                 if ($tag == '*' || $stanza->getName() == $tag) {
                     $fromServer = $stanza;
                 }
-
             }
         }
 
-        $this->logger->debug('Contents of $this->_buffer after foreach: ' . var_export($this->buffer, true));
+        $this->logger->debug('Contents of $this->buffer after foreach: ' . var_export($this->buffer, true));
 
         return $fromServer;
     }
@@ -529,14 +525,14 @@ class Connection
      * Gets a Stream object that encapsulates the actual connection to the server.
      *
      * @param string $remoteSocket Address to connect to
-     * @param int $timeOut Length of time to wait for connection
+     * @param int $timeout Length of time to wait for connection
      * @param int $flags Flags to be set on the connection
      * @param resource $context Context of the connection
      * @return Stream
      */
-    protected function getStream($remoteSocket, $timeOut = null, $flags = null, $context = null)
+    protected function getStream($remoteSocket, $timeout = null, $flags = null, $context = null)
     {
-        return new Stream($remoteSocket, $timeOut, $flags, $context, $this->logger);
+        return new Stream($remoteSocket, $timeout, $flags, $context, $this->logger);
     }
 
     /**

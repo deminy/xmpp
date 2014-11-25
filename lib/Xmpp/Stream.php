@@ -13,22 +13,22 @@ class Stream
     /**
      * @var resource
      */
-    protected $_conn;
+    protected $conn;
 
     /**
      * @var bool
      */
-    protected $_connected = false;
+    protected $connected = false;
 
     /**
      * @var int
      */
-    protected $_errorNumber;
+    protected $errno;
 
     /**
      * @var string
      */
-    protected $_errorString;
+    protected $errstr;
 
     /**
      * @var LoggerInterface
@@ -39,7 +39,7 @@ class Stream
      * Creates an instance of the Stream class
      *
      * @param string $remoteSocket The remote socket to connect to.
-     * @param int $timeOut Give up trying to connect after these number of seconds.
+     * @param int $timeout Give up trying to connect after these number of seconds.
      * @param int $flags Connection flags.
      * @param resource $context Context of the stream.
      * @param LoggerInterface $logger
@@ -47,35 +47,50 @@ class Stream
      */
     public function __construct(
         $remoteSocket,
-        $timeOut = null,
+        $timeout = null,
         $flags = null,
         $context = null,
         LoggerInterface $logger = null
     ) {
-        $this->_logger = $logger;
+        $this->logger = $logger;
 
-        $this->_conn = stream_socket_client(
-            $remoteSocket,
-            $this->_errorNumber,
-            $this->_errorString,
-            $timeOut,
-            $flags,
-            $context
-        );
+        // stream_socket_client needs to be called in the correct way based on what we have been passed.
+        if (is_null($timeout) && is_null($flags) && is_null($context)) {
+            $this->conn = stream_socket_client($remoteSocket, $this->errno, $this->errstr);
+        } else if (is_null($flags) && is_null($context)) {
+            $this->conn = stream_socket_client($remoteSocket, $this->errno, $this->errstr, $timeout);
+        } else if (is_null($context)) {
+            $this->conn = stream_socket_client(
+                $remoteSocket,
+                $this->errno,
+                $this->errstr,
+                $timeout,
+                $flags
+            );
+        } else {
+            $this->conn = stream_socket_client(
+                $remoteSocket,
+                $this->errno,
+                $this->errstr,
+                $timeout,
+                $flags,
+                $context
+            );
+        }
 
         /**
          * If the connection comes back as false, it could not be established. Note that a connection may appear to be
          * successful at this stage and yet be invalid. e.g. UDP connections are "connectionless" and not actually made
          * until they are required.
          */
-        if (false === $this->_conn) {
-            throw new StreamException($this->_errorString, $this->_errorNumber);
+        if (false === $this->conn) {
+            throw new StreamException($this->errstr, $this->errno);
         }
 
         // Set the time out of the stream.
-        stream_set_timeout($this->_conn, 1);
+        stream_set_timeout($this->conn, 1); //TODO: update required?
 
-        $this->_connected = true;
+        $this->connected = true;
     }
 
     /**
@@ -95,11 +110,11 @@ class Stream
      */
     public function disconnect()
     {
-        if (!is_null($this->_conn) && (false !== $this->_conn)) {
-            fclose($this->_conn);
+        if (!is_null($this->conn) && (false !== $this->conn)) {
+            fclose($this->conn);
 
-            $this->_conn      = null;
-            $this->_connected = false;
+            $this->conn      = null;
+            $this->connected = false;
         }
     }
 
@@ -110,7 +125,7 @@ class Stream
      */
     public function isConnected()
     {
-        return $this->_connected;
+        return $this->connected;
     }
 
     /**
@@ -121,7 +136,7 @@ class Stream
      */
     public function read($length)
     {
-        return fread($this->_conn, $length);
+        return fread($this->conn, $length);
     }
 
     /**
@@ -131,7 +146,7 @@ class Stream
      */
     public function select()
     {
-        $read = array($this->_conn);
+        $read = array($this->conn);
         $write = $except = array();
 
         return stream_select($read, $write, $except, 0, 200000);
@@ -146,9 +161,9 @@ class Stream
     public function send($message)
     {
         // Perhaps need to check the stream is still open here?
-        $this->_logger->debug('Sent: ' . $message);
+        $this->logger->debug('Sent: ' . $message);
 
-        return fwrite($this->_conn, $message);
+        return fwrite($this->conn, $message);
     }
 
     /**
@@ -159,7 +174,7 @@ class Stream
      */
     public function setBlocking($enable)
     {
-        return stream_set_blocking($this->_conn, ($enable ? 1 : 0));
+        return stream_set_blocking($this->conn, ($enable ? 1 : 0));
     }
 
     /**
@@ -170,6 +185,6 @@ class Stream
      */
     public function setTLS($enable)
     {
-        return stream_socket_enable_crypto($this->_conn, (boolean) $enable, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+        return stream_socket_enable_crypto($this->conn, (boolean) $enable, STREAM_CRYPTO_METHOD_TLS_CLIENT);
     }
 }
