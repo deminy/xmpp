@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "deminy/streamer": "@dev"
+        "deminy/streamer": "dev-master"
     },
     "authors": [
         {
