@@ -382,7 +382,7 @@ class Connection
                 unset($this->buffer[$key]);
 
                 // If this the tag we want, save it for returning.
-                if ($tag == '*' || $stanza->getName() == $tag) {
+                if (in_array($tag, array('*', $stanza->getName()))) {
                     $fromServer = $stanza;
                 }
             }

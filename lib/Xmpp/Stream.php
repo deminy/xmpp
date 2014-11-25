@@ -3,6 +3,7 @@
 namespace Xmpp;
 
 use Psr\Log\LoggerInterface;
+use Streamer\NetworkStream;
 use Xmpp\Exception\StreamException;
 
 /**
@@ -12,24 +13,9 @@ use Xmpp\Exception\StreamException;
 class Stream
 {
     /**
-     * @var resource
+     * @var NetworkStream
      */
-    protected $conn;
-
-    /**
-     * @var bool
-     */
-    protected $connected = false;
-
-    /**
-     * @var int
-     */
-    protected $errno;
-
-    /**
-     * @var string
-     */
-    protected $errstr;
+    protected $stream;
 
     /**
      * @var LoggerInterface
@@ -54,44 +40,21 @@ class Stream
         LoggerInterface $logger = null
     ) {
         $this->logger = $logger;
-
-        // stream_socket_client needs to be called in the correct way based on what we have been passed.
-        if (is_null($timeout) && is_null($flags) && is_null($context)) {
-            $this->conn = stream_socket_client($remoteSocket, $this->errno, $this->errstr);
-        } else if (is_null($flags) && is_null($context)) {
-            $this->conn = stream_socket_client($remoteSocket, $this->errno, $this->errstr, $timeout);
-        } else if (is_null($context)) {
-            $this->conn = stream_socket_client(
-                $remoteSocket,
-                $this->errno,
-                $this->errstr,
-                $timeout,
-                $flags
-            );
-        } else {
-            $this->conn = stream_socket_client(
-                $remoteSocket,
-                $this->errno,
-                $this->errstr,
-                $timeout,
-                $flags,
-                $context
-            );
-        }
+        $this->stream = NetworkStream::create($remoteSocket, $timeout, $flags, $context);
 
         /**
          * If the connection comes back as false, it could not be established. Note that a connection may appear to be
          * successful at this stage and yet be invalid. e.g. UDP connections are "connectionless" and not actually made
          * until they are required.
+         *
+         * @todo Handle exception when stream creation failed.
          */
-        if (false === $this->conn) {
+        if ($this->stream->isOpen()) {
             throw new StreamException($this->errstr, $this->errno);
         }
 
         // Set the time out of the stream.
-        stream_set_timeout($this->conn, 1); //TODO: update required?
-
-        $this->connected = true;
+        stream_set_timeout($this->stream, 1); //TODO: update required?
     }
 
     /**
@@ -111,11 +74,8 @@ class Stream
      */
     public function disconnect()
     {
-        if (!is_null($this->conn) && (false !== $this->conn)) {
-            fclose($this->conn);
-
-            $this->conn      = null;
-            $this->connected = false;
+        if ($this->stream->isOpen()) {
+            $this->stream->close();
         }
     }
 
@@ -126,7 +86,7 @@ class Stream
      */
     public function isConnected()
     {
-        return $this->connected;
+        return $this->stream->isOpen();
     }
 
     /**
@@ -137,7 +97,7 @@ class Stream
      */
     public function read($length)
     {
-        return fread($this->conn, $length);
+        return $this->stream->read($length);
     }
 
     /**
@@ -147,7 +107,7 @@ class Stream
      */
     public function select()
     {
-        $read = array($this->conn);
+        $read = array($this->stream->getResource());
         $write = $except = array();
 
         return stream_select($read, $write, $except, 0, 200000);
@@ -164,7 +124,7 @@ class Stream
         // Perhaps need to check the stream is still open here?
         $this->logger->debug('Sent: ' . $message);
 
-        return fwrite($this->conn, $message);
+        return $this->stream->write($message);
     }
 
     /**
@@ -175,7 +135,7 @@ class Stream
      */
     public function setBlocking($enable)
     {
-        return stream_set_blocking($this->conn, ($enable ? 1 : 0));
+        return stream_set_blocking($this->stream->getResource(), ($enable ? 1 : 0));
     }
 
     /**
@@ -186,6 +146,10 @@ class Stream
      */
     public function setTLS($enable)
     {
-        return stream_socket_enable_crypto($this->conn, (boolean) $enable, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+        return stream_socket_enable_crypto(
+            $this->stream->getResource(),
+            (boolean) $enable,
+            STREAM_CRYPTO_METHOD_TLS_CLIENT
+        );
     }
 }
