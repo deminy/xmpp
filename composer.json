@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "deminy/streamer": "@dev"
+        "deminy/streamer": "dev-master"
     },
     "authors": [
         {
@@ -23,5 +23,6 @@
         "psr-4" : {
             "Xmpp\\" : "lib/Xmpp/"
         }
-    }
+    },
+    "minimum-stability": "dev"
 }
