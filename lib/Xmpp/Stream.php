@@ -33,7 +33,7 @@ class Stream
     /**
      * @var LoggerInterface
      */
-    private $_logger;
+    protected $logger;
 
     /**
      * Creates an instance of the Stream class
