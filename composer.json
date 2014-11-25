@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "fzaninotto/Streamer": "@dev"
+        "deminy/streamer": "@dev"
     },
     "authors": [
         {
