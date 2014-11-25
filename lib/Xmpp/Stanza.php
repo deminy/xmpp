@@ -10,17 +10,17 @@ abstract class Stanza
     /**
      * @var string
      */
-    protected $_from;
+    protected $from;
 
     /**
      * @var string
      */
-    protected $_id;
+    protected $id;
 
     /**
      * @var string
      */
-    protected $_to;
+    protected $to;
 
     /**
      * @var string
@@ -30,21 +30,77 @@ abstract class Stanza
     /**
      * Class constructor, sets up common class variables.
      *
-     * @param SimpleXMLElement $stanza The XML itself for the stanza.
+     * @param array $options
      */
-    public function __construct(SimpleXMLElement $stanza)
+    public function __construct(array $options = array())
     {
-        if (isset($stanza['from'])) {
-            $this->_from = (string) $stanza['from'];
-        }
+        $this->from = array_key_exists('from', $options) ? $options['from'] : null;
+        $this->id   = array_key_exists('id', $options)   ? $options['id']   : null;
+        $this->to   = array_key_exists('to', $options)   ? $options['to']   : null;
+        $this->type = array_key_exists('type', $options) ? $options['type'] : null;
+    }
 
-        if (isset($stanza['to'])) {
-            $this->_to = (string) $stanza['to'];
-        }
+    /**
+     * @param string $from
+     * @return $this
+     */
+    public function setFrom($from)
+    {
+        $this->from = $from;
 
-        if (isset($stanza['id'])) {
-            $this->_id = (string) $stanza['id'];
-        }
+        return $this;
+    }
+
+    /**
+     * Returns the JID of the sender of the stanza.
+     *
+     * @return string
+     */
+    public function getFrom()
+    {
+        return $this->from;
+    }
+
+    /**
+     * @param string $id
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Returns the "id" of the stanza.
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param string $to
+     * @return $this
+     */
+    public function setTo($to)
+    {
+        $this->to = $to;
+
+        return $this;
+    }
+
+    /**
+     * Returns who the JID of who the stanza was sent to.
+     *
+     * @return string
+     */
+    public function getTo()
+    {
+        return $this->to;
     }
 
     /**
@@ -66,68 +122,5 @@ abstract class Stanza
     public function getType()
     {
         return $this->type;
-    }
-
-    /**
-     * @param string $from
-     * @return $this
-     */
-    public function setFrom($from)
-    {
-        $this->_from = $from;
-
-        return $this;
-    }
-
-    /**
-     * Returns the JID of the sender of the stanza.
-     *
-     * @return string
-     */
-    public function getFrom()
-    {
-        return $this->_from;
-    }
-
-    /**
-     * @param string $id
-     * @return $this
-     */
-    public function setId($id)
-    {
-        $this->_id = $id;
-
-        return $this;
-    }
-
-    /**
-     * Returns the "id" of the stanza.
-     *
-     * @return string
-     */
-    public function getId()
-    {
-        return $this->_id;
-    }
-
-    /**
-     * @param string $to
-     * @return $this
-     */
-    public function setTo($to)
-    {
-        $this->_to = $to;
-
-        return $this;
-    }
-
-    /**
-     * Returns who the JID of who the stanza was sent to.
-     *
-     * @return string
-     */
-    public function getTo()
-    {
-        return $this->_to;
     }
 }

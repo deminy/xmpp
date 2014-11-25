@@ -7,11 +7,11 @@ namespace Xmpp;
  */
 class Message extends Stanza
 {
-    const TYPE_CHAT = 'chat';
-    const TYPE_ERROR = 'error';
+    const TYPE_CHAT      = 'chat';
+    const TYPE_ERROR     = 'error';
     const TYPE_GROUPCHAT = 'groupchat';
-    const TYPE_HEADLINE = 'headline';
-    const TYPE_NORMAL = 'normal';
+    const TYPE_HEADLINE  = 'headline';
+    const TYPE_NORMAL    = 'normal';
 
     /**
      * @var array
