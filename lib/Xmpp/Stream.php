@@ -40,17 +40,19 @@ class Stream
         LoggerInterface $logger = null
     ) {
         $this->logger = $logger;
-        $this->stream = NetworkStream::create($remoteSocket, $timeout, $flags, $context);
+
+        $errno = $errstr = null;
+        $this->stream = NetworkStream::create($remoteSocket, $errno, $errstr, $timeout, $flags, $context);
 
         /**
          * If the connection comes back as false, it could not be established. Note that a connection may appear to be
          * successful at this stage and yet be invalid. e.g. UDP connections are "connectionless" and not actually made
          * until they are required.
          *
-         * @todo Handle exception when stream creation failed.
+         * @todo $open is always true even stream not created.
          */
-        if ($this->stream->isOpen()) {
-            throw new StreamException($this->errstr, $this->errno);
+        if (!$this->stream->isOpen()) {
+            throw new StreamException($errstr, $errno);
         }
 
         // Set the time out of the stream.
