@@ -48,8 +48,6 @@ class Stream
          * If the connection comes back as false, it could not be established. Note that a connection may appear to be
          * successful at this stage and yet be invalid. e.g. UDP connections are "connectionless" and not actually made
          * until they are required.
-         *
-         * @todo $open is always true even stream not created.
          */
         if (!$this->stream->isOpen()) {
             throw new StreamException($errstr, $errno);

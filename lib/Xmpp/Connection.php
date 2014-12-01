@@ -3,6 +3,7 @@
 namespace Xmpp;
 
 use Psr\Log\LoggerInterface;
+use SimpleXMLElement;
 use Xmpp\Exception\StreamException;
 use Xmpp\Exception\XmppException;
 
@@ -116,6 +117,16 @@ class Connection
     protected $lastResponse;
 
     /**
+     * @var int
+     */
+    protected $id;
+
+    /**
+     * @var string
+     */
+    protected $mucServer;
+
+    /**
      * Class that performs logging
      *
      * @var LoggerInterface
@@ -155,14 +166,24 @@ class Connection
     /**
      * Authenticate against server with the stored username and password.
      *
-     * Note only DIGEST-MD5 authentication is supported.
+     * Note only PLAIN and DIGEST-MD5 authentication are supported.
      *
      * @return boolean
+     * @throws XmppException
      */
     public function authenticate()
     {
-        // Check that the server said that DIGEST-MD5 was available
-        if ($this->mechanismAvailable('DIGEST-MD5')) {
+        if ($this->mechanismAvailable('PLAIN')) {
+            $message =
+                '<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">' .
+                base64_encode("\x00" . $this->username . "\x00" . $this->password) .
+                '</auth>'
+            ;
+            $this->stream->send($message);
+            $response = $this->waitForServer('success');
+
+            $this->logger->debug('Auth response (PLAIN): ' . $response->asXML());
+        } elseif ($this->mechanismAvailable('DIGEST-MD5')) {
             // Send message to the server that we want to authenticate
             $message = "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' "
                 . "mechanism='DIGEST-MD5'/>";
@@ -244,24 +265,22 @@ class Connection
                 $response = $this->waitForServer('success');
                 $this->logger->debug('Response: ' . $response->asXML());
             }
-
-
-            // Now that we have been authenticated, a new stream needs to be started.
-            $this->startStream();
-
-            // Server should now respond with start of stream and list of features
-            $response = $this->waitForServer('stream:stream');
-            $this->logger->debug('Received: ' . $response);
-
-            // If the server has not yet said what features it supports, wait
-            // for that
-            if (strpos($response->asXML(), 'stream:features') === false) {
-                $response = $this->waitForServer('stream:features');
-                $this->logger->debug('Received: ' . $response);
-            }
+        } else {
+            throw new XmppException('No implmented authentication mechanisms defined.');
         }
 
-        return true;
+        // Now that we have been authenticated, a new stream needs to be started.
+        $this->startStream();
+
+        // Server should now respond with start of stream and list of features
+        $response = $this->waitForServer('stream:stream');
+        $this->logger->debug('XMPP start of stream received: ' . $response);
+
+        // If the server has not yet said what features it supports, wait for that.
+        if (strpos($response->asXML(), 'stream:features') === false) {
+            $response = $this->waitForServer('stream:features');
+            $this->logger->debug('XMPP list of features received: ' . $response);
+        }
     }
 
     /**
@@ -272,14 +291,14 @@ class Connection
      */
     protected function mechanismAvailable($mechanism)
     {
-        return in_array($mechanism, $this->mechanisms);
+        return array_key_exists($mechanism, $this->mechanisms);
     }
 
     /**
      * Waits for the server to send the specified tag back.
      *
      * @param string $tag Tag to wait for from the server.
-     * @return boolean|SimpleXMLElement
+     * @return SimpleXMLElement|false
      */
     protected function waitForServer($tag)
     {
@@ -294,14 +313,22 @@ class Connection
             $done = false;
 
             // Read data from the connection.
+            $i = 0;
             while (!$done) {
                 $response .= $this->stream->read(4096);
+                //TODO: better implementation on the iteration.
+                if ($i++ < 100) {
+                    $this->logger->debug('Response in while loop (\Xmpp\Connection): ' . $response);
+                } else {
+                    break;
+                }
+
                 if ($this->stream->select() == 0) {
                     $done = true;
                 }
             }
 
-            $this->logger->debug('Response (\Xmpp\Connection): ' . $response);
+            $this->logger->debug('Response after while loop (\Xmpp\Connection): ' . $response);
 
             // If the response isn't empty, load it into a SimpleXML element
             if (trim($response) != '') {
@@ -353,7 +380,7 @@ class Connection
                 // If we want the stream element itself, just return that, otherwise check the contents of the stream.
                 if ($tag == 'stream:stream') {
                     $fromServer = $xml;
-                } elseif (($xml instanceof SimpleXMLElement) && ($xml->getName() == 'stream')) {
+                } elseif (($xml instanceof SimpleXMLElement) && in_array($xml->getName(), array('stream'))) {
                     // Get the namespaces used at the root level of the
                     // document. Add a blank namespace on for anything that
                     // isn't namespaced. Then we can iterate over all of the
@@ -369,6 +396,8 @@ class Connection
                     }
                 }
             }
+        } else {
+            $this->logger->debug("Tag we're waiting for '{$tag}' not presenting.");
         }
 
         $this->logger->debug('Contents of $fromServer: ' . var_export($fromServer, true));
@@ -458,7 +487,7 @@ class Connection
             // sure if we're supposed to do anything with it, so we'll just drop
             // it for now. May contain the features the server supports.
             $response = $this->waitForServer('stream:stream');
-            $this->logger->debug('Received: ' . $response);
+            $this->logger->debug('Stream tag received: ' . $response);
 
             // If the response from the server does contain a features tag, don't
             // bother querying server to get it.
@@ -472,11 +501,13 @@ class Connection
                 //
                 // Note we check for a "features" tag rather than stream:features because it is namespaced.
                 $response = $this->waitForServer('features');
-                $this->logger->debug('Received: ' . $response);
+                $this->logger->debug('Features received: ' . $response);
             }
 
             // Set mechanisms based on that tag
             $this->setMechanisms($response);
+            // @see http://tools.ietf.org/html/rfc3920#section-4 XMPP core: XML Streams
+            $this->setId($response['id']); //TODO what if ID doesn't exist
 
             // If there was a starttls tag in there, and this connection has SSL
             // enabled, then we should tell the server that we will start up tls as
@@ -488,7 +519,7 @@ class Connection
 
                 // Wait to get the proceed message back from the server
                 $response = $this->waitForServer('proceed');
-                $this->logger->debug('Received: ' . $response->asXML());
+                $this->logger->debug('Proceed received: ' . $response->asXML());
 
                 // Once we have the proceed signal from the server, we should turn
                 // on TLS on the stream and send the opening stream tag again.
@@ -500,7 +531,7 @@ class Connection
 
                 // Server should now respond with start of stream and list of features
                 $response = $this->waitForServer('stream:stream');
-                $this->logger->debug('Received: ' . $response);
+                $this->logger->debug('Start of stream received: ' . $response);
 
                 // Set mechanisms based on that tag
                 $this->setMechanisms($response);
@@ -509,8 +540,33 @@ class Connection
             // A Stream Exception occured. Catch it and rethrow it as an Xmpp Exception.
             throw new XmppException('Failed to connect: ' . $e->getMessage());
         }
+    }
 
-        return true;
+    /**
+     * @param int $id
+     * @return $this
+     */
+    protected function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMucServer()
+    {
+        return $this->mucServer;
     }
 
     /**
@@ -552,7 +608,7 @@ class Connection
      * @param SimpleXMLElement $features <stream:features> saying what server supports.
      * @return void
      */
-    protected function setMechanisms(SimpleXMLElement $features)
+    protected function setMechanisms(\SimpleXMLElement $features)
     {
         // Set up an array to hold any matches
         $matches = array();
@@ -568,7 +624,7 @@ class Connection
             $xml = simplexml_load_string($matches[1]);
 
             foreach ($xml->children() as $child) {
-                $this->mechanisms[] = (string) $child;
+                $this->mechanisms[(string) $child] = null;
             }
         }
     }
@@ -605,18 +661,14 @@ class Connection
     public function establishSession()
     {
         // Send message requesting start of session.
-        $message =
-            "<iq to='" . $this->realm . "' type='set' id='sess_1'>"
-            . "<session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>"
-            . "</iq>"
+        $message ='<iq type="set" id="sess_1" to="' . $this->realm .
+            '"><session xmlns="urn:ietf:params:xml:ns:xmpp-session"></session></iq>'
         ;
         $this->stream->send($message);
 
         // Should now get an iq in response from the server to say the session was established.
         $response = $this->waitForServer('iq');
-        $this->logger->debug('Received: ' . $response->asXML());
-
-        return true;
+        $this->logger->debug('Session establishing response received: ' . $response->asXML());
     }
 
     /**
@@ -655,7 +707,7 @@ class Connection
      * @param string $status Custom status string
      * @param string $show Current state of user, e.g. away, do not disturb
      * @param int $priority Presence priority
-     * @return boolean
+     * @return void
      * @todo Allow multiple statuses to be entered
      */
     public function presence($status = null, $show = null, $priority = null)
@@ -685,13 +737,14 @@ class Connection
         }
         $this->stream->send($message);
 
-        return true;
+        $response = $this->waitForServer('*');
+        $this->logger->debug('Presence response received: ' . $response->asXML());
     }
 
     /**
      * Wait for the server to respond.
      *
-     * @return string
+     * @return boolean
      * @todo Get this to return after a timeout period if nothing has come back
      */
     public function wait()
@@ -709,13 +762,10 @@ class Connection
     /**
      * Check if server supports the Multi-User Chat extension.
      *
-     * @return boolean
+     * @return string
      */
     public function isMucSupported()
     {
-        // Set up return value. Assume MUC isn't supported
-        $mucSupported = false;
-
         // If items is empty then we haven't yet asked the server what items are
         // associated with it. Query the server for what items are available.
         if (is_null($this->items)) {
@@ -741,7 +791,7 @@ class Connection
             while (!$response) {
                 $response = $this->waitForServer('iq');
             }
-            $this->logger->debug('Received: ' . $response->asXML());
+            $this->logger->debug('INfo discovered received: ' . $response->asXML());
 
             // Check if feature tag with appropriate var value is in response. If it is, then MUC is supported
             if (isset($response->query)) {
@@ -750,13 +800,15 @@ class Connection
                         && isset($feature->attributes()->var)
                         && $feature->attributes()->var == 'http://jabber.org/protocol/muc'
                     ) {
-                        $mucSupported = true;
+                        $this->mucServer = $item['jid'];
+
+                        return true;
                     }
                 }
             }
         }
 
-        return $mucSupported;
+        return false;
     }
 
     /**
@@ -782,15 +834,12 @@ class Connection
         while (!$response || $response->getName() != 'iq' || strpos($response->asXml(), '<item') === false) {
             $response = $this->waitForServer('iq');
         }
-        $this->logger->debug('Received: ' . $response->asXML());
+        $this->logger->debug('Items discovered received: ' . $response->asXML());
 
         // Check if query tag is in response. If it is, then iterate over the children to get the items available.
         if (isset($response->query)) {
             foreach ($response->query->children() as $item) {
-                if (($item->getName() == 'item')
-                    && isset($item->attributes()->jid)
-                    && isset($item->attributes()->name)
-                ) {
+                if (($item->getName() == 'item') && isset($item->attributes()->jid)) {
                     // If items is null then we need to turn it into an array.
                     if (is_null($this->items)) {
                         $this->items = array();
@@ -798,7 +847,7 @@ class Connection
 
                     $this->items[] = array(
                         'jid'  => $item->attributes()->jid,
-                        'name' => $item->attributes()->name,
+                        'name' => $item->attributes()->name ?: '',
                     );
                 }
             }
@@ -839,7 +888,7 @@ class Connection
         while (!$response) {
             $response = $this->waitForServer('presence');
         }
-        $this->logger->debug('Received: ' . $response->asXML());
+        $this->logger->debug('Joining response received: ' . $response->asXML());
 
         // Room has now been joined, if it isn't the array of joinedRooms, add it
         if (!in_array($roomJid, $this->joinedRooms)) {
@@ -873,7 +922,7 @@ class Connection
         while (!$response) {
             $response = $this->waitForServer('iq');
         }
-        $this->logger->debug('Received: ' . $response->asXML());
+        $this->logger->debug('Reserved nicknames received: ' . $response->asXML());
 
         // If query isn't empty then the user does have a reserved nickname.
         if (isset($response->query) && count($response->query->children()) > 0 && isset($response->query->identity)) {
