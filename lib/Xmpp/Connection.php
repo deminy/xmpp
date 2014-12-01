@@ -762,7 +762,7 @@ class Connection
     /**
      * Check if server supports the Multi-User Chat extension.
      *
-     * @return string
+     * @return boolean
      */
     public function isMucSupported()
     {
