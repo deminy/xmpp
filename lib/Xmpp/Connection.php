@@ -299,8 +299,9 @@ class Connection
      *
      * @param string $tag Tag to wait for from the server.
      * @return SimpleXMLElement|false
+     * @todo Make it protected if possbile.
      */
-    protected function waitForServer($tag)
+    public function waitForServer($tag)
     {
         $this->logger->debug("Tag we're waiting for: " . $tag);
 
