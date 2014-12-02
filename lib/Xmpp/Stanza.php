@@ -2,6 +2,9 @@
 
 namespace Xmpp;
 
+use DOMDocument;
+use SimpleXMLElement;
+
 /**
  * Abstract class for representing Xmpp Stanzas.
  */
@@ -26,6 +29,11 @@ abstract class Stanza
      * @var string
      */
     protected $type;
+
+    /**
+     * @var DOMDocument
+     */
+    protected $dom;
 
     /**
      * Class constructor, sets up common class variables.
@@ -122,5 +130,53 @@ abstract class Stanza
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @param DOMDocument $dom
+     *
+     * @return $this
+     */
+    public function setDom(DOMDocument $dom)
+    {
+        $this->dom = $dom;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setNewDom()
+    {
+        return $this->setDom(new DOMDocument('1.0', 'UTF-8'));
+    }
+
+    /**
+     * @return DOMDocument
+     */
+    protected function getDom()
+    {
+        return ($this->dom ?: $this->setNewDom()->getDom());
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return serialize($this);
+    }
+
+    /**
+     * @param DOMDocument $dom
+     * @return string
+     * @see http://stackoverflow.com/a/5947858/2752269 remove xml version tag when a xml is created in php
+     */
+    protected function toXml(DOMDocument $dom)
+    {
+        $dom = dom_import_simplexml(new SimpleXMLElement($dom->saveXML()));
+
+        return trim($dom->ownerDocument->saveXML($dom->ownerDocument->documentElement));
     }
 }

@@ -119,7 +119,8 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
     public function getMockXmppConnection(Stream $stream)
     {
         $xmpp = $this->getMock(
-            '\\Xmpp\\Connection', array('_getStream'),
+            '\\Xmpp\\Connection',
+            array('_getStream'),
             array('test@test.server.com', 'testPass', 'test.xmpp.com')
         );
         $xmpp->expects($this->once())

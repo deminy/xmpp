@@ -2,6 +2,7 @@
 
 namespace Xmpp;
 
+use DOMElement;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 use Xmpp\Exception\StreamException;
@@ -95,7 +96,7 @@ class Connection
      *
      * @var array
      */
-    protected $items = null;
+    protected $items = array();
 
     /**
      * Holds an array of rooms that have been joined on this connection.
@@ -143,6 +144,7 @@ class Connection
      * @param int $port Port to use for the connection.
      * @param string $resource Identifier of the connection.
      * @param LoggerInterface $logger
+     * @todo Logger can not be optional.
      */
     public function __construct(
         $username,
@@ -151,7 +153,7 @@ class Connection
         $ssl = true,
         $port = 5222,
         $resource = 'NewXmpp',
-        LoggerInterface $logger
+        LoggerInterface $logger = null
     ) {
         list($this->username, $this->realm) = array_pad(explode('@', $username), 2, null);
 
@@ -161,6 +163,17 @@ class Connection
         $this->ssl      = $ssl;
         $this->resource = $resource;
         $this->logger   = $logger;
+    }
+
+    /**
+     * Class destructor. Will try and close the connection if it is open.
+     */
+    public function __destruct()
+    {
+        if (!is_null($this->stream) && $this->stream->isConnected()) {
+            $this->stream->send('</stream:stream>');
+            $this->logger->debug('Stream closed.');
+        }
     }
 
     /**
@@ -434,13 +447,13 @@ class Connection
             . 'xmlns:stream="http://etherx.jabber.org/streams" '
             . 'xmlns="jabber:client" version="1.0">';
         $this->stream->send($message);
-        $this->logger->debug('Stream started');
+        $this->logger->debug('Stream started.');
     }
 
     /**
      * Bind this connection to a particular resource (the last part of the JID)
      *
-     * @return true
+     * @return void
      */
     public function bind()
     {
@@ -455,8 +468,6 @@ class Connection
         // Should get an iq response from the server confirming the jid
         $response = $this->waitForServer('*');
         $this->logger->debug('Response: ' . $response->asXML());
-
-        return true;
     }
 
     /**
@@ -611,17 +622,16 @@ class Connection
      */
     protected function setMechanisms(\SimpleXMLElement $features)
     {
-        // Set up an array to hold any matches
         $matches = array();
+        $pattern = '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/';
 
-        // A response containing a stream:features tag should have been passed in.
-        // That should contain a mechanisms tag. Find the mechanisms tag and load it
-        // into a SimpleXMLElement object.
-        if (preg_match('/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/',$features->asXml(), $matches)) {
-            // Clear out any existing mechanisms
+        /**
+         * A response containing a stream:features tag should have been passed in. The tag contain a mechanisms tag.
+         * Find the mechanisms tag and load it into a SimpleXMLElement object.
+         */
+        if (preg_match($pattern, $features->asXml(), $matches)) {
             $this->mechanisms = array();
 
-            // Create SimpleXMLElement
             $xml = simplexml_load_string($matches[1]);
 
             foreach ($xml->children() as $child) {
@@ -633,25 +643,22 @@ class Connection
     /**
      * Disconnect from the server.
      *
-     * @return boolean
+     * @return void
      */
     public function disconnect()
     {
-        $message = '</stream:stream>';
-
-        // If the stream isn't set, get one. Seems unlikely that we'd want to be
-        // disconnecting when no connection is open via a stream, but it saves us
-        // having to go through the rigormoral of actually setting up a proper, full
-        // mock connection.
+        /**
+         * If the stream isn't set, get one. Seems unlikely that we'd want to be disconnecting when no connection is
+         * open via a stream, but it saves us having to go through the rigormoral of actually setting up a proper, full
+         * mock connection.
+         */
         if (!isset($this->stream)) {
             $this->stream = $this->getStream($this->getServer());
         }
 
-        $this->stream->send($message);
+        $this->stream->send('</stream:stream>');
         $this->stream->disconnect();
-        $this->logger->debug('Disconnected');
-
-        return true;
+        $this->logger->debug('Disconnected.');
     }
 
     /**
@@ -745,19 +752,14 @@ class Connection
     /**
      * Wait for the server to respond.
      *
-     * @return boolean
+     * @param string $tag
+     * @return SimpleXMLElement|null
      * @todo Get this to return after a timeout period if nothing has come back
+     * @todo delete this one if useless.
      */
-    public function wait()
+    public function wait($tag = '*')
     {
-        // Wait for any tag to be sent by the server
-        $response = $this->waitForServer('*');
-
-        // Store the last response
-        $this->lastResponse = $response;
-
-        // Return what type of tag has come back
-        return (false === $response) ? null : $this->lastResponse->getName();
+        return ($this->waitForServer($tag) ?: null); // Wait for a tag to be sent by the server
     }
 
     /**
@@ -769,7 +771,7 @@ class Connection
     {
         // If items is empty then we haven't yet asked the server what items are
         // associated with it. Query the server for what items are available.
-        if (is_null($this->items)) {
+        if (empty($this->items)) {
             $this->discoverItems();
         }
 
@@ -792,7 +794,7 @@ class Connection
             while (!$response) {
                 $response = $this->waitForServer('iq');
             }
-            $this->logger->debug('INfo discovered received: ' . $response->asXML());
+            $this->logger->debug('Info discovered received: ' . $response->asXML());
 
             // Check if feature tag with appropriate var value is in response. If it is, then MUC is supported
             if (isset($response->query)) {
@@ -838,14 +840,10 @@ class Connection
         $this->logger->debug('Items discovered received: ' . $response->asXML());
 
         // Check if query tag is in response. If it is, then iterate over the children to get the items available.
+        $this->items = $this->items ?: array();
         if (isset($response->query)) {
             foreach ($response->query->children() as $item) {
                 if (($item->getName() == 'item') && isset($item->attributes()->jid)) {
-                    // If items is null then we need to turn it into an array.
-                    if (is_null($this->items)) {
-                        $this->items = array();
-                    }
-
                     $this->items[] = array(
                         'jid'  => $item->attributes()->jid,
                         'name' => $item->attributes()->name ?: '',
@@ -1000,7 +998,8 @@ class Connection
 
         $message = "<message to='" . $to . "' from='" . $this->username . '@'
             . $this->realm . '/' . $this->resource . "' type='" . $type
-            . "' xml:lang='en'><html xmlns='http://jabber.org/protocol/xhtml-im'><body xmlns='http://www.w3.org/1999/xhtml'>{$html}</body></html><body>"
+            . "' xml:lang='en'><html xmlns='http://jabber.org/protocol/xhtml-im'>"
+            . "<body xmlns='http://www.w3.org/1999/xhtml'>{$html}</body></html><body>"
             . $this->encode($fallbackText)
             . "</body></message>";
         $this->stream->send($message);
@@ -1016,14 +1015,15 @@ class Connection
      */
     public function ping($to)
     {
-        $message =
-            "<iq to='" . $to . "' from='" . $this->username . '@'
-            . $this->realm . '/' . $this->resource . "' type='get' "
-            . "id='" . uniqid() . "'>"
-            . "<ping xmlns='urn:xmpp:ping'/>"
-            . "</iq>"
-        ;
-        $this->stream->send($message);
+        $iq = new Iq(array(
+            'from' => $this->getFrom(),
+            'id'   => uniqid(),
+            'to'   => $to,
+            'type' => 'get',
+        ));
+        $iq->initDom(new DOMElement('ping', null, 'urn:xmpp:ping'));
+
+        $this->stream->send((string) $iq);
     }
 
     /**
@@ -1035,22 +1035,21 @@ class Connection
      */
     public function pong($to, $id)
     {
-        $message =
-            "<iq from='" . $this->username . '@' . $this->realm . '/'
-            . $this->resource . "' to='" . $to . "' id='" . $id . "' "
-            . "type='result'/>"
-        ;
-        $this->stream->send($message);
+        $iq = new Iq(array(
+            'from' => $this->getFrom(),
+            'id'   => $id,
+            'to'   => $to,
+            'type' => 'result',
+        ));
+
+        $this->stream->send((string) $iq);
     }
 
     /**
-     * Class destructor. Will try and close the connection if it is open
+     * @return string
      */
-    public function __destruct()
+    public function getFrom()
     {
-        if (!is_null($this->stream) && $this->stream->isConnected()) {
-            $this->stream->send('</stream:stream>');
-            $this->logger->debug('Stream closed');
-        }
+        return ($this->username . '@' . $this->realm . ($this->resource ? "/{$this->resource}" : ''));
     }
 }

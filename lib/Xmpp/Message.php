@@ -16,16 +16,16 @@ class Message extends Stanza
     /**
      * @var array
      */
-    protected $_bodies = array();
-    protected $_error;
-    protected $_lang;
+    protected $bodies = array();
+    protected $error;
+    protected $lang;
 
     /**
      * @var array
      */
-    protected $_subjects = array();
-    protected $_thread;
-    protected $_delayed = false;
+    protected $subjects = array();
+    protected $thread;
+    protected $delayed = false;
 
     /**
      * Class constructor.
@@ -51,14 +51,14 @@ class Message extends Stanza
 
         if ($this->type == self::TYPE_ERROR) {
             if (isset($message->error[0])) {
-                $this->_error = (string) $message->error[0];
+                $this->error = (string) $message->error[0];
             } else {
-                $this->_error = '';
+                $this->error = '';
             }
         }
 
         if (isset($message['xml:lang'])) {
-            $this->_lang = (string) $message['xml:lang'];
+            $this->lang = (string) $message['xml:lang'];
         }
 
         foreach ($message->subject as $subject) {
@@ -70,7 +70,7 @@ class Message extends Stanza
                 $thisSubject['lang'] = (string) $subject['xml:lang'];
             }
 
-            $this->_subjects[] = $thisSubject;
+            $this->subjects[] = $thisSubject;
         }
 
         foreach ($message->body as $body) {
@@ -82,17 +82,17 @@ class Message extends Stanza
                 $thisBody['lang'] = (string) $body['xml:lang'];
             }
 
-            $this->_bodies[] = $thisBody;
+            $this->bodies[] = $thisBody;
         }
 
         if (isset($message->delay[0])) {
-            $this->_delayed = true;
+            $this->delayed = true;
         }
 
         if (isset($message->thread[0])) {
-            $this->_thread = (string) $message->thread[0];
+            $this->thread = (string) $message->thread[0];
         } else {
-            $this->_thread = '';
+            $this->thread = '';
         }
     }
 
@@ -103,7 +103,7 @@ class Message extends Stanza
      */
     public function getBodies()
     {
-        return $this->_bodies;
+        return $this->bodies;
     }
 
     /**
@@ -113,7 +113,7 @@ class Message extends Stanza
      */
     public function getError()
     {
-        return $this->_error;
+        return $this->error;
     }
 
     /**
@@ -123,7 +123,7 @@ class Message extends Stanza
      */
     public function getLang()
     {
-        return $this->_lang;
+        return $this->lang;
     }
 
     /**
@@ -133,7 +133,7 @@ class Message extends Stanza
      */
     public function getSubjects()
     {
-        return $this->_subjects;
+        return $this->subjects;
     }
 
     /**
@@ -143,7 +143,7 @@ class Message extends Stanza
      */
     public function getThread()
     {
-        return $this->_thread;
+        return $this->thread;
     }
 
     /**
@@ -151,6 +151,6 @@ class Message extends Stanza
      */
     public function isDelayed()
     {
-        return $this->_delayed;
+        return $this->delayed;
     }
 }
