@@ -486,10 +486,6 @@ class Connection
             $this->stream = $this->getStream($server);
             $this->logger->debug('Connection made');
 
-            // Set the stream to blocking mode
-            $this->stream->setBlocking(true);
-            $this->logger->debug('Blocking enabled');
-
             // Attempt to send the stream start
             $this->startStream();
 
@@ -598,11 +594,17 @@ class Connection
      * @param int $timeout Length of time to wait for connection
      * @param int $flags Flags to be set on the connection
      * @param resource $context Context of the connection
+     * @param boolean $blockingMode
      * @return Stream
      */
-    protected function getStream($remoteSocket, $timeout = null, $flags = null, $context = null)
+    protected function getStream($remoteSocket, $timeout = null, $flags = null, $context = null, $blockingMode = true)
     {
-        return new Stream($remoteSocket, $timeout, $flags, $context, $this->logger);
+        $stream = new Stream($remoteSocket, $timeout, $flags, $context, $this->logger);
+
+        $stream->setBlocking($blockingMode);
+        $this->logger->debug(sprintf('Blocking mode on the stream %s.', ($blockingMode ? 'enabled' : 'disabled')));
+
+        return $stream;
     }
 
     /**
