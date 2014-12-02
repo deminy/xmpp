@@ -116,15 +116,17 @@ class Stream
     /**
      * Will sent the message passed in down the stream.
      *
-     * @param string $message Content to be sent down the stream.
+     * @param string|object $message Content to be sent down the stream.
      * @return int The number of bytes sent.
      */
     public function send($message)
     {
-        // Perhaps need to check the stream is still open here?
-        $this->logger->debug('Sent: ' . $message);
+        $data = (is_object($message) ? ((string) $message) : $message);
 
-        return $this->stream->write($message);
+        // Perhaps need to check the stream is still open here?
+        $this->logger->debug('Sent: ' . $data);
+
+        return $this->stream->write($data);
     }
 
     /**

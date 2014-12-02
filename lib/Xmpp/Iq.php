@@ -71,12 +71,4 @@ class Iq extends Stanza
 
         return $this->dom;
     }
-
-    /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->toXml($this->getDom());
-    }
 }

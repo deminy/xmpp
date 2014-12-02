@@ -161,14 +161,6 @@ abstract class Stanza
     }
 
     /**
-     * @return string
-     */
-    public function __toString()
-    {
-        return serialize($this);
-    }
-
-    /**
      * @param DOMDocument $dom
      * @return string
      * @see http://stackoverflow.com/a/5947858/2752269 remove xml version tag when a xml is created in php
@@ -178,5 +170,13 @@ abstract class Stanza
         $dom = dom_import_simplexml(new SimpleXMLElement($dom->saveXML()));
 
         return trim($dom->ownerDocument->saveXML($dom->ownerDocument->documentElement));
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->toXml($this->getDom());
     }
 }
