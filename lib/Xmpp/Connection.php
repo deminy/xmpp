@@ -748,7 +748,11 @@ class Connection
         $this->stream->send($message);
 
         $response = $this->waitForServer('*');
-        $this->logger->debug('Presence response received: ' . $response->asXML());
+        if ($response) {
+            $this->logger->debug('XMPP presence response received: ' . $response->asXML());
+        } else {
+            $this->logger->error('XMPP presence response not received.');
+        }
     }
 
     /**
