@@ -195,7 +195,7 @@ class Connection
             $this->stream->send($message);
             $response = $this->waitForServer('success');
 
-            $this->logger->debug('Auth response (PLAIN): ' . $response->asXML());
+            $this->logResponse($response, 'Auth response (PLAIN)');
         } elseif ($this->mechanismAvailable('DIGEST-MD5')) {
             // Send message to the server that we want to authenticate
             $message = "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' "
@@ -205,11 +205,11 @@ class Connection
 
             // Wait for challenge to come back from the server
             $response = $this->waitForServer('challenge');
-            $this->logger->debug('Response: ' . $response->asXML());
+            $this->logResponse($response, 'Challenge response');
 
             // Decode the response
             $decodedResponse = base64_decode((string) $response);
-            $this->logger->debug('Response (Decoded): ' . $decodedResponse);
+            $this->logResponse($response, 'Decoded response');
 
             // Split up the parts of the challenge
             $challengeParts = explode(',', $decodedResponse);
@@ -257,14 +257,14 @@ class Connection
             $message = "<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>" . base64_encode($message) . '</response>';
 
             // Send the response
-            $this->logger->debug('Challenge Response: ' . $message);
+            $this->logger->debug('Challenge response: ' . $message);
             $this->stream->send($message);
 
             // Should get another challenge back from the server. Some servers
             // don't bother though and just send a success back with the
             // rspauth encoded in it.
             $response = $this->waitForServer('*');
-            $this->logger->debug('Response: ' . $response->asXML());
+            $this->logResponse($response, 'Challenge response from server');
 
             // If we have got a challenge, we need to send a response, blank this time.
             if ($response->getName() == 'challenge') {
@@ -276,7 +276,7 @@ class Connection
 
                 // This time we should get a success message.
                 $response = $this->waitForServer('success');
-                $this->logger->debug('Response: ' . $response->asXML());
+                $this->logResponse($response, 'Challenge success response from server');
             }
         } else {
             throw new XmppException('No implmented authentication mechanisms defined.');
@@ -287,12 +287,12 @@ class Connection
 
         // Server should now respond with start of stream and list of features
         $response = $this->waitForServer('stream:stream');
-        $this->logger->debug('XMPP start of stream received: ' . $response);
+        $this->logResponse($response, 'XMPP start of stream');
 
         // If the server has not yet said what features it supports, wait for that.
-        if (strpos($response->asXML(), 'stream:features') === false) {
+        if ($response && (strpos($response->asXML(), 'stream:features') === false)) {
             $response = $this->waitForServer('stream:features');
-            $this->logger->debug('XMPP list of features received: ' . $response);
+            $this->logResponse($response, 'XMPP list of features');
         }
     }
 
@@ -467,7 +467,7 @@ class Connection
 
         // Should get an iq response from the server confirming the jid
         $response = $this->waitForServer('*');
-        $this->logger->debug('Response: ' . $response->asXML());
+        $this->logResponse($response, 'Binding response');
     }
 
     /**
@@ -496,6 +496,11 @@ class Connection
             // it for now. May contain the features the server supports.
             $response = $this->waitForServer('stream:stream');
             $this->logger->debug('Stream tag received: ' . $response);
+
+            if (!$response) {
+                $this->logger->critical('XMPP server does not send stream tag response back.');
+                return;
+            }
 
             // If the response from the server does contain a features tag, don't
             // bother querying server to get it.
@@ -527,7 +532,7 @@ class Connection
 
                 // Wait to get the proceed message back from the server
                 $response = $this->waitForServer('proceed');
-                $this->logger->debug('Proceed received: ' . $response->asXML());
+                $this->logResponse($response, 'Proceed response');
 
                 // Once we have the proceed signal from the server, we should turn
                 // on TLS on the stream and send the opening stream tag again.
@@ -539,7 +544,7 @@ class Connection
 
                 // Server should now respond with start of stream and list of features
                 $response = $this->waitForServer('stream:stream');
-                $this->logger->debug('Start of stream received: ' . $response);
+                $this->logResponse($response, 'Start of stream response');
 
                 // Set mechanisms based on that tag
                 $this->setMechanisms($response);
@@ -678,7 +683,8 @@ class Connection
 
         // Should now get an iq in response from the server to say the session was established.
         $response = $this->waitForServer('iq');
-        $this->logger->debug('Session establishing response received: ' . $response->asXML());
+        $this->logResponse($response, 'Session establishing response');
+
     }
 
     /**
@@ -748,11 +754,7 @@ class Connection
         $this->stream->send($message);
 
         $response = $this->waitForServer('*');
-        if ($response) {
-            $this->logger->debug('XMPP presence response received: ' . $response->asXML());
-        } else {
-            $this->logger->error('XMPP presence response not received.');
-        }
+        $this->logResponse($response, 'XMPP presence response');
     }
 
     /**
@@ -800,7 +802,7 @@ class Connection
             while (!$response) {
                 $response = $this->waitForServer('iq');
             }
-            $this->logger->debug('Info discovered received: ' . $response->asXML());
+            $this->logResponse($response, 'Info discovered response');
 
             // Check if feature tag with appropriate var value is in response. If it is, then MUC is supported
             if (isset($response->query)) {
@@ -843,7 +845,12 @@ class Connection
         while (!$response || $response->getName() != 'iq' || strpos($response->asXml(), '<item') === false) {
             $response = $this->waitForServer('iq');
         }
-        $this->logger->debug('Items discovered received: ' . $response->asXML());
+        $this->logResponse($response, 'Items discovery response');
+
+        if (!$response) {
+            $this->logger->critical('XMPP server does not send back valid resonses for "disco#items".');
+            return;
+        }
 
         // Check if query tag is in response. If it is, then iterate over the children to get the items available.
         $this->items = $this->items ?: array();
@@ -893,7 +900,7 @@ class Connection
         while (!$response) {
             $response = $this->waitForServer('presence');
         }
-        $this->logger->debug('Joining response received: ' . $response->asXML());
+        $this->logResponse($response, 'Joining response');
 
         // Room has now been joined, if it isn't the array of joinedRooms, add it
         if (!in_array($roomJid, $this->joinedRooms)) {
@@ -927,7 +934,7 @@ class Connection
         while (!$response) {
             $response = $this->waitForServer('iq');
         }
-        $this->logger->debug('Reserved nicknames received: ' . $response->asXML());
+        $this->logResponse($response, 'Reserved nicknames response');
 
         // If query isn't empty then the user does have a reserved nickname.
         if (isset($response->query) && count($response->query->children()) > 0 && isset($response->query->identity)) {
@@ -1057,5 +1064,23 @@ class Connection
     public function getFrom()
     {
         return ($this->username . '@' . $this->realm . ($this->resource ? "/{$this->resource}" : ''));
+    }
+
+    /**
+     * @param SimpleXMLElement|false $response
+     * @param $messageType
+     * @return void
+     */
+    public function logResponse($response, $messageType)
+    {
+        if ($response ) {
+            if ($response instanceof SimpleXMLElement) {
+                $this->logger->debug("{$messageType} received: {$response->asXML()}");
+            } else {
+                $this->logger->debug("{$messageType} received (not a SimpleXMLElement object): {$response}");
+            }
+        } else {
+            $this->logger->error("{$messageType} not received.");
+        }
     }
 }
