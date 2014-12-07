@@ -627,7 +627,7 @@ class Connection
      * @param SimpleXMLElement $features <stream:features> saying what server supports.
      * @return void
      */
-    protected function setMechanisms(\SimpleXMLElement $features)
+    protected function setMechanisms(SimpleXMLElement $features)
     {
         $matches = array();
         $pattern = '/<stream:features.*(<mechanisms.*<\/mechanisms>).*<\/stream:features>/';
