@@ -34,28 +34,28 @@ class Xep0045
     protected $logger;
 
     /**
-     * @param array $params
+     * @param array $options
      * @param LoggerInterface $logger
      * @throws Exception
      */
-    public function __construct(array $params, LoggerInterface $logger = null)
+    public function __construct(array $options, LoggerInterface $logger = null)
     {
         $this->logger = $logger;
 
         $this->connection = new Connection(
-            $params['username'],
-            $params['password'],
-            $params['host'],     // example.com
-            $params['ssl'],      // Boolean TRUE or FALSE.
-            $params['port'],
-            $params['resource'],
+            $options['username'],
+            $options['password'],
+            $options['host'],     // example.com
+            $options['ssl'],      // Boolean TRUE or FALSE.
+            $options['port'],
+            $options['resource'],
             $this->logger
         );
 
         // $this->options['id'] = substr($options['username'], 0, strpos($options['username'], '@'));
-        $this->options['realm'] = substr($params['username'], strpos($params['username'], '@') + 1);
+        $this->options['realm'] = substr($options['username'], strpos($options['username'], '@') + 1);
         $this->options['from']  = $this->getFullUserId(
-            substr($params['username'], 0, strpos($params['username'], '@')), // $this->options['id'],
+            substr($options['username'], 0, strpos($options['username'], '@')), // $this->options['id'],
             '' // $options['resource']
         );
 

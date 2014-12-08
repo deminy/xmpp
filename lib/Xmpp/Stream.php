@@ -54,7 +54,7 @@ class Stream
         }
 
         // Set the time out of the stream.
-        stream_set_timeout($this->stream, 1); //TODO: update required?
+        stream_set_timeout($this->stream->getResource(), 1); //TODO: update required?
     }
 
     /**
