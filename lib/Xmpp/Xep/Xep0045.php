@@ -3,8 +3,7 @@
 namespace Xmpp\Xep;
 
 use DOMElement;
-use Monolog\Handler\NullHandler;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Xmpp\Connection;
 use Xmpp\Iq;
 use Xmpp\Presence;
@@ -30,21 +29,17 @@ class Xep0045
     protected $connection;
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     protected $logger;
 
     /**
      * @param array $options
-     * @param Logger $logger
+     * @param LoggerInterface $logger
      * @throws Exception
      */
-    public function __construct(array $options, Logger $logger = null)
+    public function __construct(array $options, LoggerInterface $logger = null)
     {
-        if (empty($logger)) {
-            $logger = new Logger('xmpp');
-            $logger->pushHandler(new NullHandler());
-        }
         $this->logger = $logger;
 
         $this->connection = new Connection(

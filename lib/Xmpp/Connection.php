@@ -1073,7 +1073,7 @@ class Connection
      */
     public function logResponse($response, $messageType)
     {
-        if ($response ) {
+        if ($response) {
             if ($response instanceof SimpleXMLElement) {
                 $this->logger->debug("{$messageType} received: {$response->asXML()}");
             } else {
