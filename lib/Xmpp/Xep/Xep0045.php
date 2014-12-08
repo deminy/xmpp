@@ -166,7 +166,7 @@ class Xep0045
      * @see http://xmpp.org/extensions/xep-0045.html#grantmember
      * @todo Encode user nickname first before using it; otherwise adding user could fail because of invalid XML.
      */
-    public function addUser($roomId, $userId, $reason = '')
+    public function grantMember($roomId, $userId, $reason = '')
     {
         $iq = $this->getIq('set')->setTo($this->getFullRoomId($roomId));
         $iq->initQuery(
@@ -194,7 +194,7 @@ class Xep0045
      * @return boolean
      * @see http://xmpp.org/extensions/xep-0045.html#revokemember
      */
-    public function removeUser($roomId, $userId, $reason = '')
+    public function revokeMember($roomId, $userId, $reason = '')
     {
         $iq = $this->getIq('set')->setTo($this->getFullRoomId($roomId));
         $iq->initQuery(
