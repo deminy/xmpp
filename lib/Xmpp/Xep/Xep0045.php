@@ -47,7 +47,6 @@ class Xep0045
         }
         $this->logger = $logger;
 
-        //TODO
         $this->connection = new Connection(
             $options['username'],
             $options['password'],
@@ -94,18 +93,11 @@ class Xep0045
     /**
      * @param string $roomId
      * @param string $nickname
-     * @param boolean $prefixedWithEnv
      * @return string
      */
-    public function getFullRoomId($roomId, $nickname = '', $prefixedWithEnv = true)
+    public function getFullRoomId($roomId, $nickname = '')
     {
-        $fullRoomId = $roomId . '@' . $this->options['mucServer'];
-
-        if ($prefixedWithEnv) {
-            $fullRoomId = strtolower(Server::getCurrentEnv()) . '_' . $fullRoomId;
-        }
-
-        return ($fullRoomId . ($nickname ? "/{$nickname}" : ''));
+        return ($roomId . '@' . $this->options['mucServer'] . ($nickname ? "/{$nickname}" : ''));
     }
 
     /**
