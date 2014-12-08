@@ -78,7 +78,6 @@ class Xep0045
      * @param string $userId
      * @param string $resource
      * @return string
-     * @todo Rename $nickname to something more properly.
      */
     public function getFullUserId($userId, $resource = '')
     {
