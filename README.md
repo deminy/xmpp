@@ -2,7 +2,7 @@
 
 Before creating this repository, I've evaluated following XMPP libraries for PHP:
 
-* [Nikita's fork](https://github.com/nikita2206/Xmpp) based on [Alexander's code](https://github.com/alexmace/Xmpp).
+* [Nikita's fork](https://github.com/nikita2206/Xmpp), which was based on [Alexander's code](https://github.com/alexmace/Xmpp).
 * [XMPPHP](https://code.google.com/p/xmpphp). There is a better fork made by [Charles](https://github.com/charlycoste/xmpphp).
 * [JAXL](https://github.com/jaxl/JAXL).
 
