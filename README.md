@@ -32,7 +32,7 @@ $options = array(
     'username' => 'your_username',
     'password' => 'your_password',
     'host'     => 'example.com',
-    'ssl'      => true,
+    'ssl'      => false,
     'port'     => 5222,
     'resource' => 'laptop',
 );
