@@ -29,6 +29,13 @@ class Connection
     const PRESENCE_XA   = 'xa';
 
     /**
+     * Time interval of usleep() when waiting server responses.
+     *
+     * @var int
+     */
+    const USLEEP_TIME = 5;
+
+    /**
      * Host name of the server to connect to
      *
      * @var string
@@ -340,7 +347,7 @@ class Connection
                 if ($this->stream->select() == 0) {
                     $done = true;
                 } else {
-                    usleep(10);
+                    usleep(self::USLEEP_TIME);
                 }
             }
 
