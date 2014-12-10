@@ -131,7 +131,7 @@ class Xep0045
             'http://jabber.org/protocol/muc#owner',
             'destroy',
             array(
-                'jid' => $this->getFullRoomId($roomId),
+                // 'jid' => $this->getFullRoomId($roomId),
             ),
             $reason
         );
