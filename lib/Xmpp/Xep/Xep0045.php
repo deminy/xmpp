@@ -4,6 +4,7 @@ namespace Xmpp\Xep;
 
 use DOMElement;
 use Psr\Log\LoggerInterface;
+use SimpleXMLElement;
 use Xmpp\Connection;
 use Xmpp\Iq;
 use Xmpp\Presence;
@@ -114,7 +115,7 @@ class Xep0045
         $this->connection->getCurrentStream()->send($presence);
 
         $response = $this->connection->waitForServer('*');
-        $this->logger->debug('Response when creating chatroom: ' . $response);
+        $this->connection->logResponse($response, 'Response when creating chatroom');
     }
 
     /**
@@ -178,7 +179,7 @@ class Xep0045
 
         usleep(300000); //TODO: wait for 0.3 second; fix it.
         $response = $this->connection->waitForServer('iq');
-        $this->logger->debug('Response: ' . $response);
+        $this->connection->logResponse($response, 'Response when granting member');
     }
 
     /**
@@ -204,7 +205,7 @@ class Xep0045
         $this->connection->getCurrentStream()->send($iq);
 
         $response = $this->connection->waitForServer('*');
-        $this->logger->debug('Response: ' . $response);
+        $this->connection->logResponse($response, 'Response when revoking member');
     }
 
     /**
@@ -226,9 +227,10 @@ class Xep0045
         $this->connection->getCurrentStream()->send($iq);
 
         $response = $this->connection->waitForServer('*');
+        $this->connection->logResponse($response, 'Response when getting member list');
 
         $members = array();
-        if (!empty($response)) {
+        if ($response instanceof SimpleXMLElement) {
             /**
              * In case when error happens, the response could be like following:
              *
