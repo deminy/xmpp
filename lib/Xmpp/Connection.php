@@ -330,14 +330,16 @@ class Connection
         // If there is nothing left in the buffer, wait for the stream to update
         if (count($this->buffer) == 0 && $this->stream->select() > 0) {
             $response = '';
-            // Read data from the connection.
-            for ($i = 0; $i < 100; $i++) {
+            $done     = false;
+
+            while (!$done) {
+                // Read data from the connection.
                 $response .= $this->stream->read(4096);
                 if ($this->stream->select() == 0) {
-                    break;
+                    $done = true;
+                } else {
+                    usleep(self::USLEEP_TIME);
                 }
-
-                usleep(self::USLEEP_TIME);
             }
 
             $this->logger->debug('Response after while loop (\Xmpp\Connection): ' . $response);
