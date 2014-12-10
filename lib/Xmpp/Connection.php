@@ -339,6 +339,8 @@ class Connection
 
                 if ($this->stream->select() == 0) {
                     $done = true;
+                } else {
+                    usleep(10);
                 }
             }
 
@@ -408,7 +410,11 @@ class Connection
                             }
                         }
                     }
+                } else {
+                    $this->logger->debug("Revised XMPP response is invalid: {$response}.");
                 }
+            } else {
+                $this->logger->debug("We're waiting for tag '{$tag}', but the response is blank.");
             }
         } else {
             $this->logger->debug("Tag we're waiting for '{$tag}' not presenting.");
@@ -495,7 +501,7 @@ class Connection
             // sure if we're supposed to do anything with it, so we'll just drop
             // it for now. May contain the features the server supports.
             $response = $this->waitForServer('stream:stream');
-            $this->logger->debug('Stream tag received: ' . $response);
+            $this->logResponse($response, 'Stream tag received');
 
             if (!$response) {
                 $this->logger->critical('XMPP server does not send stream tag response back.');
@@ -514,7 +520,7 @@ class Connection
                 //
                 // Note we check for a "features" tag rather than stream:features because it is namespaced.
                 $response = $this->waitForServer('features');
-                $this->logger->debug('Features received: ' . $response);
+                $this->logResponse($response, 'Features received');
             }
 
             // Set mechanisms based on that tag
@@ -1073,14 +1079,14 @@ class Connection
      */
     public function logResponse($response, $messageType)
     {
-        if ($response) {
-            if ($response instanceof SimpleXMLElement) {
-                $this->logger->debug("{$messageType} received: {$response->asXML()}");
-            } else {
-                $this->logger->debug("{$messageType} received (not a SimpleXMLElement object): {$response}");
-            }
+        if ($response instanceof SimpleXMLElement) {
+            $this->logger->debug("{$messageType} received: {$response->asXML()}");
         } else {
-            $this->logger->error("{$messageType} not received.");
+            if ($response) {
+                $this->logger->debug("{$messageType} received (not a SimpleXMLElement object): {$response}");
+            } else {
+                $this->logger->error("{$messageType} not received.");
+            }
         }
     }
 }
