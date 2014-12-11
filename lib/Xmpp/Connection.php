@@ -94,6 +94,11 @@ class Connection
     protected $stream;
 
     /**
+     * @var bool
+     */
+    protected $blockingMode = true;
+
+    /**
      * @var array
      */
     protected $mechanisms = array();
@@ -177,10 +182,7 @@ class Connection
      */
     public function __destruct()
     {
-        if (!is_null($this->stream) && $this->stream->isConnected()) {
-            $this->stream->send('</stream:stream>');
-            $this->logger->debug('Stream closed.');
-        }
+        $this->disconnect();
     }
 
     /**
@@ -482,12 +484,9 @@ class Connection
      */
     public function connect()
     {
-        // Figure out where we need to connect to
-        $server = $this->getServer();
-
         try {
             // Get a connection to server
-            $this->stream = $this->getStream($server);
+            $this->stream = $this->getStream();
             $this->logger->debug('Connection made');
 
             // Attempt to send the stream start
@@ -599,29 +598,20 @@ class Connection
     /**
      * Gets a Stream object that encapsulates the actual connection to the server.
      *
-     * @param string $remoteSocket Address to connect to
-     * @param int $timeout Length of time to wait for connection
-     * @param int $flags Flags to be set on the connection
-     * @param resource $context Context of the connection
-     * @param boolean $blockingMode
      * @return Stream
      */
-    protected function getStream($remoteSocket, $timeout = null, $flags = null, $context = null, $blockingMode = true)
+    public function getStream()
     {
-        $stream = new Stream($remoteSocket, $timeout, $flags, $context, $this->logger);
+        if (empty($this->stream)) {
+            $this->stream = new Stream($this->getServer(), null, null, null, $this->logger);
 
-        $stream->setBlocking($blockingMode);
-        $this->logger->debug(sprintf('Blocking mode on the stream %s.', ($blockingMode ? 'enabled' : 'disabled')));
+            $this->stream->setBlocking($this->blockingMode);
+            $this->logger->debug(sprintf(
+                'Blocking mode on the stream %s.',
+                ($this->blockingMode ? 'enabled' : 'disabled'))
+            );
+        }
 
-        return $stream;
-    }
-
-    /**
-     * @return Stream
-     * @todo Refactor so that method getSteam() is not presented any more.
-     */
-    public function getCurrentStream()
-    {
         return $this->stream;
     }
 
@@ -658,18 +648,11 @@ class Connection
      */
     public function disconnect()
     {
-        /**
-         * If the stream isn't set, get one. Seems unlikely that we'd want to be disconnecting when no connection is
-         * open via a stream, but it saves us having to go through the rigormoral of actually setting up a proper, full
-         * mock connection.
-         */
-        if (!isset($this->stream)) {
-            $this->stream = $this->getStream($this->getServer());
+        if (!is_null($this->stream) && $this->stream->isConnected()) {
+            $this->stream->send('</stream:stream>');
+            $this->stream->disconnect();
+            $this->logger->debug('Disconnected.');
         }
-
-        $this->stream->send('</stream:stream>');
-        $this->stream->disconnect();
-        $this->logger->debug('Disconnected.');
     }
 
     /**

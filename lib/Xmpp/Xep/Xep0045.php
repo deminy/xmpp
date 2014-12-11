@@ -64,7 +64,7 @@ class Xep0045
         $this->connection->authenticate();
         $this->connection->bind();
         $this->connection->establishSession();
-        $this->connection->presence();
+        // $this->connection->presence();
 
         if ($this->connection->isMucSupported()) {
             $this->options['mucServer'] = $this->connection->getMucServer();
@@ -73,6 +73,14 @@ class Xep0045
 
             throw new Exception('Chatting functionality is not available for now.');
         }
+    }
+
+    /**
+     * @return void
+     */
+    public function __destruct()
+    {
+        $this->connection->disconnect();
     }
 
     /**
@@ -112,7 +120,7 @@ class Xep0045
             ->initDom(new DOMElement('x', null, 'http://jabber.org/protocol/muc'))
         ;
 
-        $this->connection->getCurrentStream()->send($presence);
+        $this->connection->getStream()->send($presence);
 
         $response = $this->connection->waitForServer('*');
         $this->connection->logResponse($response, 'Response when creating chatroom');
@@ -136,7 +144,7 @@ class Xep0045
             $reason
         );
 
-        $this->connection->getCurrentStream()->send($iq);
+        $this->connection->getStream()->send($iq);
 
         $response = $this->connection->waitForServer('*');
         $this->connection->logResponse($response, 'Response when destroying chatroom');
@@ -175,9 +183,7 @@ class Xep0045
             $reason
         );
 
-        $this->connection->getCurrentStream()->send($iq);
-
-        usleep(300000); //TODO: wait for 0.3 second; fix it.
+        $this->connection->getStream()->send($iq);
         $response = $this->connection->waitForServer('iq');
         $this->connection->logResponse($response, 'Response when granting member');
     }
@@ -202,7 +208,7 @@ class Xep0045
             $reason
         );
 
-        $this->connection->getCurrentStream()->send($iq);
+        $this->connection->getStream()->send($iq);
 
         $response = $this->connection->waitForServer('*');
         $this->connection->logResponse($response, 'Response when revoking member');
@@ -224,7 +230,7 @@ class Xep0045
             )
         );
 
-        $this->connection->getCurrentStream()->send($iq);
+        $this->connection->getStream()->send($iq);
 
         $response = $this->connection->waitForServer('*');
         $this->connection->logResponse($response, 'Response when getting member list');
@@ -268,5 +274,13 @@ class Xep0045
         }
 
         return $iq;
+    }
+
+    /**
+     * @return Connection
+     */
+    public function getConnection()
+    {
+        return $this->connection;
     }
 }
