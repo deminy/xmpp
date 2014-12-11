@@ -29,12 +29,13 @@ $roomId = 'YourHouse';
 $userId = 'Tom';
 
 $options = array(
-    'username' => 'your_username',
-    'password' => 'your_password',
-    'host'     => 'example.com',
-    'ssl'      => false,
-    'port'     => 5222,
-    'resource' => 'laptop',
+    'username'  => 'your_username',
+    'password'  => 'your_password',
+    'host'      => 'example.com',
+    'ssl'       => false,
+    'port'      => 5222,
+    'resource'  => uniqid('', true),
+    'mucServer' => 'conference.example.com',
 );
 $xmpp = new Xep0045($options, $logger);
 
