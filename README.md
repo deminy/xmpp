@@ -44,6 +44,7 @@ $xmpp->getMemberList($roomId);         // Get member list and there should be on
 $xmpp->revokeMember($roomId, $userId); // Remove the only member out from the room.
 $xmpp->getMemberList($roomId);         // Get member list and there should be nobody in the room.
 $xmpp->destroyRoom($roomId);           // Destroy the room.
+$xmpp->getConnection()->disconnect();  // Disconnect from the server. Important for heavy-loaded servers.
 ```
 
 # Known Limitations
