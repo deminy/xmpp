@@ -44,7 +44,6 @@ $xmpp->getMemberList($roomId);         // Get member list and there should be on
 $xmpp->revokeMember($roomId, $userId); // Remove the only member out from the room.
 $xmpp->getMemberList($roomId);         // Get member list and there should be nobody in the room.
 $xmpp->destroyRoom($roomId);           // Destroy the room.
-$xmpp->getConnection()->disconnect();  // Disconnect from the server. Important for heavy-loaded servers.
 ```
 
 # Known Limitations
@@ -52,6 +51,12 @@ $xmpp->getConnection()->disconnect();  // Disconnect from the server. Important 
 * Only part of [XEP-0045](http://xmpp.org/extensions/xep-0045.html) protocol extension have been implemented.
 * Although code was refactored/written following [FIG PSR standards](http://www.php-fig.org), it was developped and
 tested for certain project under certain environment only.
+
+# Credits
+
+* [Nikita's fork](https://github.com/nikita2206/Xmpp).
+* Valuable suggestions, helps on performance improments and tests from colleague Jose (known to all as Tachu), Jakub and
+Jerry.
 
 # License
 
