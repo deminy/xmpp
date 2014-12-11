@@ -6,6 +6,7 @@ use DOMElement;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 use Xmpp\Connection;
+use Xmpp\Exception\XmppException;
 use Xmpp\Iq;
 use Xmpp\Presence;
 
@@ -35,9 +36,16 @@ class Xep0045
     protected $logger;
 
     /**
-     * @param array $options
+     * @param array $options List of options:
+     *   # username:
+     *   # password:
+     *   # host: e.g., example.com
+     *   # ssl: Boolean TRUE or FALSE
+     *   # port: e.g., 5222
+     *   # resource: For heavy loaded server, suggest it make it unique for each call. e.g., "uniqid('', true)".
+     *   # mucServer: If not specified, it will query against the XMPP server to get MUC server. Suggesting to provide
+     *                it for performance reason.
      * @param LoggerInterface $logger
-     * @throws Exception
      */
     public function __construct(array $options, LoggerInterface $logger = null)
     {
@@ -46,8 +54,8 @@ class Xep0045
         $this->connection = new Connection(
             $options['username'],
             $options['password'],
-            $options['host'],     // example.com
-            $options['ssl'],      // Boolean TRUE or FALSE.
+            $options['host'],
+            $options['ssl'],
             $options['port'],
             $options['resource'],
             $this->logger
@@ -66,13 +74,7 @@ class Xep0045
         $this->connection->establishSession();
         // $this->connection->presence();
 
-        if ($this->connection->isMucSupported()) {
-            $this->options['mucServer'] = $this->connection->getMucServer();
-        } else {
-            $this->logger->critical('XMPP server seems not supporting MUC.');
-
-            throw new Exception('Chatting functionality is not available for now.');
-        }
+        $this->setMucServer(array_key_exists('mucServer', $options) ? $options['mucServer'] : null);
     }
 
     /**
@@ -81,6 +83,28 @@ class Xep0045
     public function __destruct()
     {
         $this->connection->disconnect();
+    }
+
+    /**
+     * @param string $host
+     * @return $this
+     * @throws XmppException
+     */
+    public function setMucServer($host = null)
+    {
+        if (!empty($host)) {
+            $this->options['mucServer'] = $host;
+        } else {
+            if ($this->connection->isMucSupported()) {
+                $this->options['mucServer'] = $this->connection->getMucServer();
+            } else {
+                $this->logger->critical('XMPP server seems not supporting MUC.');
+
+                throw new XmppException('Chatting functionality is not available for now.');
+            }
+        }
+
+        return $this;
     }
 
     /**

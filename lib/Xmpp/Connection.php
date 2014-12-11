@@ -608,8 +608,8 @@ class Connection
             $this->stream->setBlocking($this->blockingMode);
             $this->logger->debug(sprintf(
                 'Blocking mode on the stream %s.',
-                ($this->blockingMode ? 'enabled' : 'disabled'))
-            );
+                ($this->blockingMode ? 'enabled' : 'disabled')
+            ));
         }
 
         return $this->stream;
