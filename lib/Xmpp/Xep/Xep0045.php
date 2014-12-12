@@ -4,7 +4,6 @@ namespace Xmpp\Xep;
 
 use DOMElement;
 use SimpleXMLElement;
-use Xmpp\Iq;
 use Xmpp\Presence;
 
 /**

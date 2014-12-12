@@ -5,6 +5,7 @@ namespace Xmpp\Xep;
 use Psr\Log\LoggerInterface;
 use Xmpp\Connection;
 use Xmpp\Exception\XmppException;
+use Xmpp\Iq;
 
 /**
  * The Xmpp\Xep\AbstractXep class.
