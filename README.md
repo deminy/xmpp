@@ -18,7 +18,7 @@ work.
   * Sends messages to individuals and MUC rooms.
 * Following features are added by me, plus various refactoring, etc:
   * Connects to and authenticates using PLAIN.
-  * [XEP-0045](http://xmpp.org/extensions/xep-0045.html) related implementations, including to create chatroom, destroy chatroom, add member, revoke member and get member list.
+  * [XEP-0045](http://xmpp.org/extensions/xep-0045.html) (Multi-User Chat) related implementations, including to create chatroom, destroy chatroom, add member, revoke member and get member list.
 
 # Sample Code
 
@@ -50,7 +50,7 @@ $xmpp->disconnect();                   // Disconnect from the server. Important 
 
 # Known Limitations
 
-* Only part of [XEP-0045](http://xmpp.org/extensions/xep-0045.html) protocol extension have been implemented.
+* Only part of [XEP-0045](http://xmpp.org/extensions/xep-0045.html) (Multi-User Chat) protocol extension have been implemented.
 * Although code was refactored/written following [FIG PSR standards](http://www.php-fig.org), it was developped and
 tested for certain project under certain environment only.
 
