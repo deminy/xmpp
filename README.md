@@ -18,7 +18,7 @@ work.
   * Sends messages to individuals and MUC rooms.
 * Following features are added by me, plus various refactoring, etc:
   * Connects to and authenticates using PLAIN.
-  * [XEP-0045](http://xmpp.org/extensions/xep-0045.html) (Multi-User Chat) related implementations, including to create chatroom, destroy chatroom, add member, revoke member and get member list.
+  * [XEP-0045](http://xmpp.org/extensions/xep-0045.html) (Multi-User Chat) related implementations, including to create chatroom, destroy chatroom, grant member, revoke member and get member list.
 
 # Sample Code
 
