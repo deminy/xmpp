@@ -124,6 +124,21 @@ abstract class AbstractXep
     }
 
     /**
+     * @param string $type
+     * @return Iq
+     */
+    protected function getIq($type = null)
+    {
+        $iq = new Iq($this->options);
+
+        if (isset($type)) {
+            $iq->setType($type);
+        }
+
+        return $iq;
+    }
+
+    /**
      * Disconnect from the server.
      *
      * @return void
