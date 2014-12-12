@@ -301,6 +301,16 @@ class Xep0045
     }
 
     /**
+     * Disconnect from the server.
+     *
+     * @return void
+     */
+    public function disconnect()
+    {
+        $this->getConnection->disconnect();
+    }
+
+    /**
      * @return Connection
      */
     public function getConnection()
