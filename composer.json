@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "deminy/streamer": "@dev",
+        "deminy/streamer": "~0.0.1",
         "psr/log": "~1.0"
     },
     "authors": [
