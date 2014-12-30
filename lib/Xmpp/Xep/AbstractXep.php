@@ -43,6 +43,7 @@ abstract class AbstractXep
      *   # mucServer: If not specified, it will query against the XMPP server to get MUC server. Suggesting to provide
      *                it for performance reason.
      * @param LoggerInterface $logger
+     * @throws XmppException
      */
     public function __construct(array $options, LoggerInterface $logger = null)
     {

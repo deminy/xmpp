@@ -205,6 +205,10 @@ class Connection
             $response = $this->waitForServer('success');
 
             $this->logResponse($response, 'Auth response (PLAIN)');
+
+            if (!($response instanceof SimpleXMLElement) && empty($response)) {
+                throw new XmppException('PLAIN authentication failed.');
+            }
         } elseif ($this->mechanismAvailable('DIGEST-MD5')) {
             // Send message to the server that we want to authenticate
             $message = "<auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' "
