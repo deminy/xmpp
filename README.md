@@ -23,7 +23,7 @@ work.
 # Sample Code
 
 ```php
-use Xmpp\Xep\Xep0045;
+use Xmpp\Xep\Xep0045 as xmpp;
 
 $roomId = 'YourHouse';
 $userId = 'Tom';
@@ -35,9 +35,9 @@ $options = array(
     'ssl'       => false,
     'port'      => 5222,
     'resource'  => uniqid('', true),
-    'mucServer' => 'conference.example.com',
+    'mucServer' => 'conference.example.com', // optional
 );
-$xmpp = new Xep0045($options, $logger);
+$xmpp = new xmpp($options, $logger);
 
 $xmpp->createRoom($roomId);            // Create the room.
 $xmpp->grantMember($roomId, $userId);  // Add a member to the room.
