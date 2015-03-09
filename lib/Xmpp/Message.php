@@ -30,9 +30,9 @@ class Message extends Stanza
     /**
      * Class constructor.
      *
-     * @param SimpleXMLElement $message The XML of the message.
+     * @param \SimpleXMLElement $message The XML of the message.
      */
-    public function __construct(SimpleXMLElement $message)
+    public function __construct(\SimpleXMLElement $message)
     {
 
         parent::__construct($message);
